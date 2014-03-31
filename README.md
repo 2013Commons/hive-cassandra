@@ -30,12 +30,67 @@ Instructions of usage:
 
 That's all, and enjoy it.
 
+========================================================================================================================
+Usage example:
+
+First create table in cql:
+
+cqlsh>:
+
+create KEYSPACE sharktest WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
+
+CREATE TABLE test(
+    id text,
+    value text,
+    PRIMARY KEY (id))
+WITH comment='' AND read_repair_chance = 2.0;
+
+CREATE TABLE test2(
+    id text,
+    value text,
+    PRIMARY KEY (id))
+WITH comment='' AND read_repair_chance = 2.0;
+
+
+INSERT INTO test(id,value)
+VALUES ('a','valueA');
+
+INSERT INTO test2(id,value)
+VALUES ('a','valueA2');
+
+INSERT INTO test2(id,value)
+VALUES ('b','valueB2');
+
+shark>
+
+CREATE EXTERNAL TABLE test
+    ( id string,
+  value  string) STORED BY
+    'org.apache.hadoop.hive.cassandra.cql.CqlStorageHandler'
+    WITH SERDEPROPERTIES ("cassandra.ks.name" = "sharktest");
+
+CREATE EXTERNAL TABLE test2
+    ( id binary,
+  value  string) STORED BY
+    'org.apache.hadoop.hive.cassandra.cql.CqlStorageHandler'
+    WITH SERDEPROPERTIES ("cassandra.ks.name" = "sharktest");
+
+
+ A insert query :
+ 
+ shark> INSERT OVERWRITE TABLE test
+        SELECT * FROM test2;
+        
+ A iner join query:
+ 
+ SELECT * FROM test
+ INNER JOIN test2
+ ON test.id=test2.id;
 
 
 
 
-
-
+========================================================================================================================
 References:
 
 Hive cassandra serde from project : dvasilen / Hive-Cassandra
