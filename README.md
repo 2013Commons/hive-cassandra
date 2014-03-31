@@ -15,17 +15,16 @@ Instructions of usage:
 
   b. Choose Prebuild with Hadoop2, CDH4.5.0: shark-0.9.0-hadoop2-bin  and   AMPLab's Hive 0.11: hive-0.11.0-bin
                                         
-  c. Set up shark environment as mentioned in the Shark official page.
+  c. Set up Shark environment as mentioned in the Shark official page.
 
 
 2. Install the project:
 
   a. Git project and compile it.
-  b. Copy those jars to the shark(installed dir)/lib/. those jar are : cassandra-all-2.0.4.jar, cassandra-thrift-2.0.4.jar,
-     hive-0.11.0-hadoop-2.0.0-cassandra-2.0-0.0.1.jar, whick are in the project/target and project/target/dependency.
+  b. Copy those jars to the shark(installed dir)/lib/. those jar are : cassandra-all-2.0.4.jar, cassandra-thrift-2.0.4.jar,  hive-0.11.0-hadoop-2.0.0-cassandra-2.0-0.0.1.jar, whick are in the project/target and project/target/dependency.
      
      
-3. execute: in shark directory, and run ./bin/shark.
+3. Execute: in shark directory, and run ./bin/shark.
 
 
 That's all, and enjoy it.
@@ -38,6 +37,8 @@ First create table in cql:
 cqlsh>:
 
 create KEYSPACE sharktest WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
+
+use sharktest;
 
 CREATE TABLE test(
     id text,
