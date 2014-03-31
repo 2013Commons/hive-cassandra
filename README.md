@@ -1,17 +1,17 @@
 hive-cassandra
 ==============
 
-Hive Cassandra storage handler implemented with Hadoop2 and for Apache Shark.
-The goal of this project is to acquire a hive cassandra storage for Apache Shark, using Cassandra 2.0 and Hadoop 2.0.
+Hive Cassandra Storage Handler implemented with Hadoop2 and for Apache Shark.
+The goal of this project is to acquire a Hive Cassandra Storage Handler for Apache Shark, using Cassandra 2.0 and Hadoop 2.0.
 
 
 ==============
 
 Instructions of usage:
 
-1. Configuration of shark environment.
+1. Configuration of Shark environment.
 
-  a. Download Shark and Hive with hadoop2 from https://groups.google.com/forum/#!topic/shark-users/XXAlk4OACe8.
+  a. Download Shark and Hive with Hadoop 2 from https://groups.google.com/forum/#!topic/shark-users/XXAlk4OACe8.
 
   b. Choose Prebuild with Hadoop2, CDH4.5.0: shark-0.9.0-hadoop2-bin  and   AMPLab's Hive 0.11: hive-0.11.0-bin
                                         
@@ -32,7 +32,7 @@ That's all, and enjoy it.
 ========================================================================================================================
 Usage example:
 
-First create table in cql:
+First create table in Cql:
 
 cqlsh>:
 
