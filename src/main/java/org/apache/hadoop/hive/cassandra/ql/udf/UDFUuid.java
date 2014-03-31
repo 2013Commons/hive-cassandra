@@ -22,5 +22,5 @@ public class UDFUuid extends UDF {
     public BytesWritable evaluate(Text text) {
         return new BytesWritable(UUIDGen.decompose(UUID.fromString(new String(text.getBytes()))));
     }
-
+    
 }

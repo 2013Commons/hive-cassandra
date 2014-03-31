@@ -14,6 +14,7 @@ public class CassandraLazyBinary extends LazyBinary {
         BytesWritable incoming = other.getWritableObject();
         byte[] bytes = new byte[incoming.getLength()];
         System.arraycopy(incoming.getBytes(), 0, bytes, 0, incoming.getLength());
+        
         data = new BytesWritable(bytes);
     }
 
