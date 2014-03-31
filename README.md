@@ -2,6 +2,7 @@ hive-cassandra
 ==============
 
 Hive Cassandra storage handler implemented with Hadoop2 and for Apache Shark.
+The goal of this project is to acquire a hive cassandra storage for Apache Shark, using Cassandra 2.0 and Hadoop 2.0.
 
 
 ==============
