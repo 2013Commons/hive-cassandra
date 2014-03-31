@@ -10,44 +10,36 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CassandraClientHolder
-{
+public class CassandraClientHolder {
+
     private static final Logger log = LoggerFactory.getLogger(CassandraClientHolder.class);
 
     private Cassandra.Client client;
     private final TTransport transport;
     private String keyspace;
 
-    public CassandraClientHolder(TTransport transport) throws CassandraException
-    {
+    public CassandraClientHolder(TTransport transport) throws CassandraException {
         this(transport, null);
     }
 
-    public CassandraClientHolder(TTransport transport, String keyspace) throws CassandraException
-
-    {
+    public CassandraClientHolder(TTransport transport, String keyspace) throws CassandraException {
         this.transport = transport;
         this.keyspace = keyspace;
         initClient();
     }
 
-    public boolean isOpen()
-    {
+    public boolean isOpen() {
         return client != null && transport != null && transport.isOpen();
     }
 
-    public String getKeyspace()
-    {
+    public String getKeyspace() {
         return keyspace;
     }
 
-    private void initClient() throws CassandraException
-    {
-        try
-        {
+    private void initClient() throws CassandraException {
+        try {
             transport.open();
-        } catch (TTransportException e)
-        {
+        } catch (TTransportException e) {
             throw new CassandraException("unable to connect to server", e);
         }
 
@@ -60,68 +52,49 @@ public class CassandraClientHolder
     /**
      * Set the client with the (potentially) new keyspace. Safe to call this
      * repeatedly with the same keyspace.
+     *
      * @param keyspace
      * @return
      * @throws CassandraException
      */
-    public void setKeyspace(String ks) throws CassandraException
-    {
-        if ( ks == null )
-        {
+    public void setKeyspace(String ks) throws CassandraException {
+        if (ks == null) {
             return;
         }
 
-        if (keyspace == null || !StringUtils.equals(keyspace, ks))
-        {
-            try
-            {
+        if (keyspace == null || !StringUtils.equals(keyspace, ks)) {
+            try {
                 this.keyspace = ks;
                 client.set_keyspace(keyspace);
-            } catch (InvalidRequestException e)
-            {
+            } catch (InvalidRequestException e) {
                 throw new CassandraException(e);
-            } catch (TException e)
-            {
+            } catch (TException e) {
                 throw new CassandraException(e);
             }
         }
     }
 
-    public Cassandra.Client getClient()
-    {
+    public Cassandra.Client getClient() {
         return client;
     }
 
-
-
-    public void close()
-    {
-        if ( transport == null || !transport.isOpen() )
-        {
+    public void close() {
+        if (transport == null || !transport.isOpen()) {
             return;
         }
-        try
-        {
+        try {
             transport.flush();
-        } catch (Exception e)
-        {
-            log.error("Could not flush transport for client holder: "+ toString(), e);
-        } finally
-        {
-            try
-            {
-                if (transport.isOpen())
-                {
+        } catch (Exception e) {
+            log.error("Could not flush transport for client holder: " + toString(), e);
+        } finally {
+            try {
+                if (transport.isOpen()) {
                     transport.close();
                 }
-            } catch (Exception e)
-            {
-                log.error("Error on transport close for client: " + toString(),e);
+            } catch (Exception e) {
+                log.error("Error on transport close for client: " + toString(), e);
             }
         }
     }
-
-
-
 
 }

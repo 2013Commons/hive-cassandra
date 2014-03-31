@@ -31,53 +31,49 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl;
 
 /**
- * Hadoop InputFormat allowing map/reduce against Cassandra rows within one ColumnFamily.
+ * Hadoop InputFormat allowing map/reduce against Cassandra rows within one
+ * ColumnFamily.
  *
- * At minimum, you need to set the KS and CF in your Hadoop job Configuration.  
- * The ConfigHelper class is provided to make this
- * simple:
- *   ConfigHelper.setInputColumnFamily
+ * At minimum, you need to set the KS and CF in your Hadoop job Configuration.
+ * The ConfigHelper class is provided to make this simple:
+ * ConfigHelper.setInputColumnFamily
  *
  * You can also configure the number of rows per InputSplit with
- *   ConfigHelper.setInputSplitSize. The default split size is 64k rows.
- *   the number of CQL rows per page
- *   
- *   the number of CQL rows per page
- *   CQLConfigHelper.setInputCQLPageRowSize. The default page row size is 1000. You 
- *   should set it to "as big as possible, but no bigger." It set the LIMIT for the CQL 
- *   query, so you need set it big enough to minimize the network overhead, and also
- *   not too big to avoid out of memory issue.
- *   
- *   the column names of the select CQL query. The default is all columns
- *   CQLConfigHelper.setInputColumns
- *   
- *   the user defined the where clause
- *   CQLConfigHelper.setInputWhereClauses. The default is no user defined where clause
+ * ConfigHelper.setInputSplitSize. The default split size is 64k rows. the
+ * number of CQL rows per page
+ *
+ * the number of CQL rows per page CQLConfigHelper.setInputCQLPageRowSize. The
+ * default page row size is 1000. You should set it to "as big as possible, but
+ * no bigger." It set the LIMIT for the CQL query, so you need set it big enough
+ * to minimize the network overhead, and also not too big to avoid out of memory
+ * issue.
+ *
+ * the column names of the select CQL query. The default is all columns
+ * CQLConfigHelper.setInputColumns
+ *
+ * the user defined the where clause CQLConfigHelper.setInputWhereClauses. The
+ * default is no user defined where clause
  */
-public class CqlPagingInputFormat extends AbstractColumnFamilyInputFormat<Map<String, ByteBuffer>, Map<String, ByteBuffer>>
-{
+public class CqlPagingInputFormat extends AbstractColumnFamilyInputFormat<Map<String, ByteBuffer>, Map<String, ByteBuffer>> {
+
     public RecordReader<Map<String, ByteBuffer>, Map<String, ByteBuffer>> getRecordReader(InputSplit split, JobConf jobConf, final Reporter reporter)
-            throws IOException
-    {
-        TaskAttemptContext tac = new TaskAttemptContextImpl(jobConf, TaskAttemptID.forName(jobConf.get(MAPRED_TASK_ID)))
-        {
+            throws IOException {
+        TaskAttemptContext tac = new TaskAttemptContextImpl(jobConf, TaskAttemptID.forName(jobConf.get(MAPRED_TASK_ID))) {
             @Override
-            public void progress()
-            {
+            public void progress() {
                 reporter.progress();
             }
         };
 
         CqlPagingRecordReader recordReader = new CqlPagingRecordReader();
-        recordReader.initialize((org.apache.hadoop.mapreduce.InputSplit)split, tac);
+        recordReader.initialize((org.apache.hadoop.mapreduce.InputSplit) split, tac);
         return recordReader;
     }
 
     @Override
     public org.apache.hadoop.mapreduce.RecordReader<Map<String, ByteBuffer>, Map<String, ByteBuffer>> createRecordReader(
             org.apache.hadoop.mapreduce.InputSplit arg0, TaskAttemptContext arg1) throws IOException,
-            InterruptedException
-    {
+            InterruptedException {
         return new CqlPagingRecordReader();
     }
 

@@ -9,14 +9,14 @@ import org.apache.hadoop.io.Text;
 
 @UDFType(deterministic = true)
 @Description(name = "hex_to_bytes",
-    value = "_FUNC_([string]) - Converts a String to the correct binary format for Cassandra blob fields",
-    extended = "Takes a String and returns a binary object \n" +
-                "after passing it through Hex.hexToBytes()")
+        value = "_FUNC_([string]) - Converts a String to the correct binary format for Cassandra blob fields",
+        extended = "Takes a String and returns a binary object \n"
+        + "after passing it through Hex.hexToBytes()")
 
 public class UDFHexToBytes extends UDF {
 
-  public BytesWritable evaluate(Text text){
-    return new BytesWritable(Hex.hexToBytes(new String(text.getBytes())));
-  }
+    public BytesWritable evaluate(Text text) {
+        return new BytesWritable(Hex.hexToBytes(new String(text.getBytes())));
+    }
 
 }

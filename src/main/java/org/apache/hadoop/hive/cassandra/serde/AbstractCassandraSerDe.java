@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-public abstract class AbstractCassandraSerDe implements SerDe{
+public abstract class AbstractCassandraSerDe implements SerDe {
 
     public static final Logger LOG = LoggerFactory.getLogger(AbstractCassandraSerDe.class);
 
@@ -90,8 +90,8 @@ public abstract class AbstractCassandraSerDe implements SerDe{
     public abstract ObjectInspector createObjectInspector();
 
     /*
-   * Turns obj (a Hive Row) into a cassandra data format.
-   */
+     * Turns obj (a Hive Row) into a cassandra data format.
+     */
     @Override
     public Writable serialize(Object obj, ObjectInspector objInspector) throws SerDeException {
         if (objInspector.getCategory() != ObjectInspector.Category.STRUCT) {
@@ -103,12 +103,12 @@ public abstract class AbstractCassandraSerDe implements SerDe{
         StructObjectInspector soi = (StructObjectInspector) objInspector;
         List<? extends StructField> fields = soi.getAllStructFieldRefs();
         List<Object> list = soi.getStructFieldsDataAsList(obj);
-        List<? extends StructField> declaredFields =
-                (serdeParams.getRowTypeInfo() != null &&
-                        ((StructTypeInfo) serdeParams.getRowTypeInfo())
-                                .getAllStructFieldNames().size() > 0) ?
-                        ((StructObjectInspector) getObjectInspector()).getAllStructFieldRefs()
-                        : null;
+        List<? extends StructField> declaredFields
+                = (serdeParams.getRowTypeInfo() != null
+                && ((StructTypeInfo) serdeParams.getRowTypeInfo())
+                .getAllStructFieldNames().size() > 0)
+                ? ((StructObjectInspector) getObjectInspector()).getAllStructFieldRefs()
+                : null;
         try {
             return mapping.getWritable(fields, list, declaredFields);
         } catch (IOException e) {
@@ -116,10 +116,11 @@ public abstract class AbstractCassandraSerDe implements SerDe{
         }
     }
 
-   /**
-   * @see org.apache.hadoop.hive.serde2.Deserializer#deserialize(org.apache.hadoop.io.Writable)
-   * Turns a Cassandra row into a Hive row.
-   */
+    /**
+     * @see
+     * org.apache.hadoop.hive.serde2.Deserializer#deserialize(org.apache.hadoop.io.Writable)
+     * Turns a Cassandra row into a Hive row.
+     */
     public abstract Object deserialize(Writable w) throws SerDeException;
 
     /**
@@ -127,8 +128,8 @@ public abstract class AbstractCassandraSerDe implements SerDe{
      *
      * @param tbl table properties
      * @return cassandra keyspace
-     * @throws org.apache.hadoop.hive.serde2.SerDeException
-     *          error parsing keyspace
+     * @throws org.apache.hadoop.hive.serde2.SerDeException error parsing
+     * keyspace
      */
     protected String parseCassandraKeyspace(Properties tbl) throws SerDeException {
         String result = tbl.getProperty(CASSANDRA_KEYSPACE_NAME);
@@ -155,8 +156,8 @@ public abstract class AbstractCassandraSerDe implements SerDe{
      *
      * @param tbl table properties
      * @return cassandra column family name
-     * @throws org.apache.hadoop.hive.serde2.SerDeException
-     *          error parsing column family name
+     * @throws org.apache.hadoop.hive.serde2.SerDeException error parsing column
+     * family name
      */
     protected String parseCassandraColumnFamily(Properties tbl) throws SerDeException {
         String result = tbl.getProperty(CASSANDRA_CF_NAME);
@@ -184,7 +185,8 @@ public abstract class AbstractCassandraSerDe implements SerDe{
     }
 
     /**
-     * Set the table mapping. We only support transposed mapping and regular table mapping for now.
+     * Set the table mapping. We only support transposed mapping and regular
+     * table mapping for now.
      *
      * @throws org.apache.hadoop.hive.serde2.SerDeException
      *
@@ -212,16 +214,18 @@ public abstract class AbstractCassandraSerDe implements SerDe{
     }
 
     /**
-     * @return the name of the cassandra keyspace as parsed from table properties
+     * @return the name of the cassandra keyspace as parsed from table
+     * properties
      */
-    public String getCassandraKeyspace(){
+    public String getCassandraKeyspace() {
         return cassandraKeyspace;
     }
 
     /**
-     * @return the name of the cassandra columnfamily as parsed from table properties
+     * @return the name of the cassandra columnfamily as parsed from table
+     * properties
      */
-    public String getCassandraColumnFamily(){
+    public String getCassandraColumnFamily() {
         return cassandraColumnFamily;
     }
 }

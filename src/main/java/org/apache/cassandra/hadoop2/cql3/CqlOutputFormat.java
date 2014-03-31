@@ -17,7 +17,6 @@
  */
 package org.apache.cassandra.hadoop2.cql3;
 
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -29,48 +28,47 @@ import org.apache.hadoop.mapreduce.*;
 
 /**
  * The <code>ColumnFamilyOutputFormat</code> acts as a Hadoop-specific
- * OutputFormat that allows reduce tasks to store keys (and corresponding
- *  binded variable values) as CQL rows (and respective columns) in a given
+ * OutputFormat that allows reduce tasks to store keys (and corresponding binded
+ * variable values) as CQL rows (and respective columns) in a given
  * ColumnFamily.
  *
  * <p>
- * As is the case with the {@link org.apache.cassandra.hadoop2.ColumnFamilyInputFormat},
- * you need to set the prepared statement in your
- * Hadoop job Configuration. The {@link CqlConfigHelper} class, through its
- * {@link ConfigHelper#setOutputPreparedStatement} method, is provided to make this
- * simple.
- * you need to set the Keyspace. The {@link ConfigHelper} class, through its
- * {@link ConfigHelper#setOutputColumnFamily} method, is provided to make this
- * simple.
+ * As is the case with the
+ * {@link org.apache.cassandra.hadoop2.ColumnFamilyInputFormat}, you need to set
+ * the prepared statement in your Hadoop job Configuration. The
+ * {@link CqlConfigHelper} class, through its
+ * {@link ConfigHelper#setOutputPreparedStatement} method, is provided to make
+ * this simple. you need to set the Keyspace. The {@link ConfigHelper} class,
+ * through its {@link ConfigHelper#setOutputColumnFamily} method, is provided to
+ * make this simple.
  * </p>
- * 
+ *
  * <p>
  * For the sake of performance, this class employs a lazy write-back caching
  * mechanism, where its record writer prepared statement binded variable values
- * created based on the reduce's inputs (in a task-specific map), and periodically 
- * makes the changes official by sending a execution of prepared statement request 
- * to Cassandra.
+ * created based on the reduce's inputs (in a task-specific map), and
+ * periodically makes the changes official by sending a execution of prepared
+ * statement request to Cassandra.
  * </p>
  */
-public class CqlOutputFormat extends org.apache.cassandra.hadoop2.AbstractColumnFamilyOutputFormat<Map<String, ByteBuffer>, List<ByteBuffer>>
-{   
-    /** Fills the deprecated OutputFormat interface for streaming. */
+public class CqlOutputFormat extends org.apache.cassandra.hadoop2.AbstractColumnFamilyOutputFormat<Map<String, ByteBuffer>, List<ByteBuffer>> {
+
+    /**
+     * Fills the deprecated OutputFormat interface for streaming.
+     */
     @Deprecated
-    public CqlRecordWriter getRecordWriter(org.apache.hadoop.fs.FileSystem filesystem, org.apache.hadoop.mapred.JobConf job, String name, org.apache.hadoop.util.Progressable progress) throws IOException
-    {
+    public CqlRecordWriter getRecordWriter(org.apache.hadoop.fs.FileSystem filesystem, org.apache.hadoop.mapred.JobConf job, String name, org.apache.hadoop.util.Progressable progress) throws IOException {
         return new CqlRecordWriter(job, new Progressable(progress));
     }
 
     /**
      * Get the {@link RecordWriter} for the given task.
      *
-     * @param context
-     *            the information about the current task.
+     * @param context the information about the current task.
      * @return a {@link RecordWriter} to write the output for the job.
      * @throws IOException
      */
-    public CqlRecordWriter getRecordWriter(final TaskAttemptContext context) throws IOException, InterruptedException
-    {
+    public CqlRecordWriter getRecordWriter(final TaskAttemptContext context) throws IOException, InterruptedException {
         return new CqlRecordWriter(context);
     }
 }

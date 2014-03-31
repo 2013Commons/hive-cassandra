@@ -20,177 +20,172 @@ import java.util.SortedMap;
 import org.apache.cassandra.db.Column;
 
 public class CassandraHiveRecordReader extends RecordReader<BytesWritable, MapWritable>
-  implements org.apache.hadoop.mapred.RecordReader<BytesWritable, MapWritable> {
-  static final Logger LOG = LoggerFactory.getLogger(CassandraHiveRecordReader.class);
+        implements org.apache.hadoop.mapred.RecordReader<BytesWritable, MapWritable> {
 
-  private final boolean isTransposed;
-  private final ColumnFamilyRecordReader cfrr;
-  private Iterator<Map.Entry<ByteBuffer, Column>> columnIterator = null;
-  private Map.Entry<ByteBuffer, Column> currentEntry;
-  private Iterator<Column> subColumnIterator = null;
-  private BytesWritable currentKey = null;
-  private final MapWritable currentValue = new MapWritable();
+    static final Logger LOG = LoggerFactory.getLogger(CassandraHiveRecordReader.class);
 
-  public static final BytesWritable keyColumn = new BytesWritable(CassandraColumnSerDe.CASSANDRA_KEY_COLUMN.getBytes());
-  public static final BytesWritable columnColumn = new BytesWritable(CassandraColumnSerDe.CASSANDRA_COLUMN_COLUMN.getBytes());
-  public static final BytesWritable subColumnColumn = new BytesWritable(CassandraColumnSerDe.CASSANDRA_SUBCOLUMN_COLUMN.getBytes());
-  public static final BytesWritable valueColumn = new BytesWritable(CassandraColumnSerDe.CASSANDRA_VALUE_COLUMN.getBytes());
+    private final boolean isTransposed;
+    private final ColumnFamilyRecordReader cfrr;
+    private Iterator<Map.Entry<ByteBuffer, Column>> columnIterator = null;
+    private Map.Entry<ByteBuffer, Column> currentEntry;
+    private Iterator<Column> subColumnIterator = null;
+    private BytesWritable currentKey = null;
+    private final MapWritable currentValue = new MapWritable();
 
+    public static final BytesWritable keyColumn = new BytesWritable(CassandraColumnSerDe.CASSANDRA_KEY_COLUMN.getBytes());
+    public static final BytesWritable columnColumn = new BytesWritable(CassandraColumnSerDe.CASSANDRA_COLUMN_COLUMN.getBytes());
+    public static final BytesWritable subColumnColumn = new BytesWritable(CassandraColumnSerDe.CASSANDRA_SUBCOLUMN_COLUMN.getBytes());
+    public static final BytesWritable valueColumn = new BytesWritable(CassandraColumnSerDe.CASSANDRA_VALUE_COLUMN.getBytes());
 
-
-  public CassandraHiveRecordReader(ColumnFamilyRecordReader cfrr, boolean isTransposed)
-  {
-    this.cfrr = cfrr;
-    this.isTransposed = isTransposed;
-  }
-
-  @Override
-  public void close() throws IOException {
-    cfrr.close();
-  }
-
-  @Override
-  public BytesWritable createKey() {
-    return new BytesWritable();
-  }
-
-  @Override
-  public MapWritable createValue() {
-    return new MapWritable();
-  }
-
-  @Override
-  public long getPos() throws IOException {
-    return cfrr.getPos();
-  }
-
-  @Override
-  public float getProgress() throws IOException {
-    return cfrr.getProgress();
-  }
-
-  @Override
-  public boolean next(BytesWritable key, MapWritable value) throws IOException {
-
-    if (!nextKeyValue()) {
-      return false;
+    public CassandraHiveRecordReader(ColumnFamilyRecordReader cfrr, boolean isTransposed) {
+        this.cfrr = cfrr;
+        this.isTransposed = isTransposed;
     }
 
-    key.set(getCurrentKey());
+    @Override
+    public void close() throws IOException {
+        cfrr.close();
+    }
 
-    value.clear();
-    value.putAll(getCurrentValue());
+    @Override
+    public BytesWritable createKey() {
+        return new BytesWritable();
+    }
 
-    return true;
-  }
+    @Override
+    public MapWritable createValue() {
+        return new MapWritable();
+    }
 
-  @Override
-  public BytesWritable getCurrentKey()  {
-    return currentKey;
-  }
+    @Override
+    public long getPos() throws IOException {
+        return cfrr.getPos();
+    }
 
-  @Override
-  public MapWritable getCurrentValue() {
-    return currentValue;
-  }
+    @Override
+    public float getProgress() throws IOException {
+        return cfrr.getProgress();
+    }
 
-  @Override
-  public void initialize(InputSplit split, TaskAttemptContext context) throws IOException {
-    cfrr.initialize(split, context);
-  }
+    @Override
+    public boolean next(BytesWritable key, MapWritable value) throws IOException {
 
-  private BytesWritable convertByteBuffer(ByteBuffer val)
-  {
-    return new BytesWritable(ByteBufferUtil.getArray(val));
-  }
-
-  @Override
-  public boolean nextKeyValue() throws IOException {
-
-    boolean next = false;
-
-    // In the case that we are transposing we create a fixed set of columns
-    // per cassandra column
-    if (isTransposed) {
-      // This loop is exited almost every time with the break at the end,
-      // see DSP-465 note below
-      while (true) {
-        if ((columnIterator == null || !columnIterator.hasNext()) && (subColumnIterator == null || !subColumnIterator.hasNext())) {
-          next = cfrr.nextKeyValue();
-          if (next) {
-            columnIterator = cfrr.getCurrentValue().entrySet().iterator();
-            subColumnIterator = null;
-            currentEntry = null;
-          } else {
-            //More sub columns for super columns.
-            if (subColumnIterator != null && subColumnIterator.hasNext()) {
-              next = true;
-            }
-          }
-        } else {
-          next = true;
+        if (!nextKeyValue()) {
+            return false;
         }
 
-        if (next) {
-          currentKey = convertByteBuffer(cfrr.getCurrentKey());
-          currentValue.clear();
-          Map.Entry<ByteBuffer, Column> entry = currentEntry;
+        key.set(getCurrentKey());
 
-          if (subColumnIterator == null || !subColumnIterator.hasNext()) {
-            // DSP-465: detect range ghosts and skip this
-            if (columnIterator.hasNext()) {
-              entry = columnIterator.next();
-              currentEntry = entry;
-              subColumnIterator = null;
-            } else {
-              continue;
+        value.clear();
+        value.putAll(getCurrentValue());
+
+        return true;
+    }
+
+    @Override
+    public BytesWritable getCurrentKey() {
+        return currentKey;
+    }
+
+    @Override
+    public MapWritable getCurrentValue() {
+        return currentValue;
+    }
+
+    @Override
+    public void initialize(InputSplit split, TaskAttemptContext context) throws IOException {
+        cfrr.initialize(split, context);
+    }
+
+    private BytesWritable convertByteBuffer(ByteBuffer val) {
+        return new BytesWritable(ByteBufferUtil.getArray(val));
+    }
+
+    @Override
+    public boolean nextKeyValue() throws IOException {
+
+        boolean next = false;
+
+        // In the case that we are transposing we create a fixed set of columns
+        // per cassandra column
+        if (isTransposed) {
+            // This loop is exited almost every time with the break at the end,
+            // see DSP-465 note below
+            while (true) {
+                if ((columnIterator == null || !columnIterator.hasNext()) && (subColumnIterator == null || !subColumnIterator.hasNext())) {
+                    next = cfrr.nextKeyValue();
+                    if (next) {
+                        columnIterator = cfrr.getCurrentValue().entrySet().iterator();
+                        subColumnIterator = null;
+                        currentEntry = null;
+                    } else {
+                        //More sub columns for super columns.
+                        if (subColumnIterator != null && subColumnIterator.hasNext()) {
+                            next = true;
+                        }
+                    }
+                } else {
+                    next = true;
+                }
+
+                if (next) {
+                    currentKey = convertByteBuffer(cfrr.getCurrentKey());
+                    currentValue.clear();
+                    Map.Entry<ByteBuffer, Column> entry = currentEntry;
+
+                    if (subColumnIterator == null || !subColumnIterator.hasNext()) {
+                        // DSP-465: detect range ghosts and skip this
+                        if (columnIterator.hasNext()) {
+                            entry = columnIterator.next();
+                            currentEntry = entry;
+                            subColumnIterator = null;
+                        } else {
+                            continue;
+                        }
+                    }
+
+                    // rowKey
+                    currentValue.put(keyColumn, currentKey);
+
+                    // column name
+                    currentValue.put(columnColumn, convertByteBuffer(currentEntry.getValue().name()));
+
+                    currentValue.put(valueColumn, convertByteBuffer(currentEntry.getValue().value()));
+
+                }
+
+                break; //exit ghost row loop
             }
-          }
+        } else { //untransposed
+            next = cfrr.nextKeyValue();
 
-              // rowKey
-              currentValue.put(keyColumn, currentKey);
+            currentValue.clear();
 
-              // column name
-              currentValue.put(columnColumn, convertByteBuffer(currentEntry.getValue().name()));
+            if (next) {
+                currentKey = convertByteBuffer(cfrr.getCurrentKey());
 
-              currentValue.put(valueColumn, convertByteBuffer(currentEntry.getValue().value()));
+                // rowKey
+                currentValue.put(keyColumn, currentKey);
+                populateMap(cfrr.getCurrentValue(), currentValue);
+            }
+        }
 
-          }
+        return next;
+    }
 
-        break; //exit ghost row loop
-      }
-    } else { //untransposed
-        next = cfrr.nextKeyValue();
+    private void populateMap(SortedMap<ByteBuffer, Column> cvalue, MapWritable value) {
+        for (Map.Entry<ByteBuffer, Column> e : cvalue.entrySet()) {
+            ByteBuffer k = e.getKey();
+            Column v = e.getValue();
 
-        currentValue.clear();
+            if (!v.isLive(new Date().getTime())) {
+                continue;
+            }
 
-        if (next) {
-            currentKey = convertByteBuffer(cfrr.getCurrentKey());
+            BytesWritable newKey = convertByteBuffer(k);
+            BytesWritable newValue = convertByteBuffer(v.value());
 
-            // rowKey
-            currentValue.put(keyColumn, currentKey);
-            populateMap(cfrr.getCurrentValue(), currentValue);
+            value.put(newKey, newValue);
         }
     }
-
-    return next;
-  }
-
-  private void populateMap(SortedMap<ByteBuffer, Column> cvalue, MapWritable value)
-  {
-    for (Map.Entry<ByteBuffer, Column> e : cvalue.entrySet())
-    {
-      ByteBuffer k = e.getKey();
-      Column    v = e.getValue();
-
-      if (!v.isLive(new Date().getTime())) {
-        continue;
-      }
-
-      BytesWritable newKey   = convertByteBuffer(k);
-      BytesWritable newValue = convertByteBuffer(v.value());
-
-      value.put(newKey, newValue);
-    }
-  }
 }

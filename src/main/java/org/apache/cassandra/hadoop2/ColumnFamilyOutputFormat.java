@@ -17,7 +17,6 @@
  */
 package org.apache.cassandra.hadoop2;
 
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -27,13 +26,12 @@ import org.apache.hadoop.mapreduce.*;
 /**
  * The <code>ColumnFamilyOutputFormat</code> acts as a Hadoop-specific
  * OutputFormat that allows reduce tasks to store keys (and corresponding
- * values) as Cassandra rows (and respective columns) in a given
- * ColumnFamily.
+ * values) as Cassandra rows (and respective columns) in a given ColumnFamily.
  *
  * <p>
  * As is the case with the {@link ColumnFamilyInputFormat}, you need to set the
- * Keyspace and ColumnFamily in your
- * Hadoop job Configuration. The {@link ConfigHelper} class, through its
+ * Keyspace and ColumnFamily in your Hadoop job Configuration. The
+ * {@link ConfigHelper} class, through its
  * {@link ConfigHelper#setOutputColumnFamily} method, is provided to make this
  * simple.
  * </p>
@@ -45,25 +43,24 @@ import org.apache.hadoop.mapreduce.*;
  * official by sending a batch mutate request to Cassandra.
  * </p>
  */
-public class ColumnFamilyOutputFormat extends AbstractColumnFamilyOutputFormat<ByteBuffer,List<Mutation>>
-{
-    /** Fills the deprecated OutputFormat interface for streaming. */
+public class ColumnFamilyOutputFormat extends AbstractColumnFamilyOutputFormat<ByteBuffer, List<Mutation>> {
+
+    /**
+     * Fills the deprecated OutputFormat interface for streaming.
+     */
     @Deprecated
-    public ColumnFamilyRecordWriter getRecordWriter(org.apache.hadoop.fs.FileSystem filesystem, org.apache.hadoop.mapred.JobConf job, String name, org.apache.hadoop.util.Progressable progress)
-    {
+    public ColumnFamilyRecordWriter getRecordWriter(org.apache.hadoop.fs.FileSystem filesystem, org.apache.hadoop.mapred.JobConf job, String name, org.apache.hadoop.util.Progressable progress) {
         return new ColumnFamilyRecordWriter(job, new Progressable(progress));
     }
 
     /**
      * Get the {@link RecordWriter} for the given task.
      *
-     * @param context
-     *            the information about the current task.
+     * @param context the information about the current task.
      * @return a {@link RecordWriter} to write the output for the job.
      * @throws IOException
      */
-    public ColumnFamilyRecordWriter getRecordWriter(final TaskAttemptContext context) throws InterruptedException
-    {
+    public ColumnFamilyRecordWriter getRecordWriter(final TaskAttemptContext context) throws InterruptedException {
         return new ColumnFamilyRecordWriter(context);
     }
 }

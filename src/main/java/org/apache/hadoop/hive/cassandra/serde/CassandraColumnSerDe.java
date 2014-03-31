@@ -42,13 +42,13 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
 
     public static final String CASSANDRA_SPECIAL_COLUMN_KEY = "row_key";
     public static final String CASSANDRA_SPECIAL_COLUMN_COL = "column_name";
-    public static final String CASSANDRA_SPECIAL_COLUMN_SCOL= "sub_column_name";
+    public static final String CASSANDRA_SPECIAL_COLUMN_SCOL = "sub_column_name";
     public static final String CASSANDRA_SPECIAL_COLUMN_VAL = "value";
 
-    public static final String CASSANDRA_KEY_COLUMN       = ":key";
-    public static final String CASSANDRA_COLUMN_COLUMN    = ":column";
+    public static final String CASSANDRA_KEY_COLUMN = ":key";
+    public static final String CASSANDRA_COLUMN_COLUMN = ":column";
     public static final String CASSANDRA_SUBCOLUMN_COLUMN = ":subcolumn";
-    public static final String CASSANDRA_VALUE_COLUMN     = ":value";
+    public static final String CASSANDRA_VALUE_COLUMN = ":value";
 
     /* names of columns from SerdeParameters */
     protected List<String> cassandraColumnNames;
@@ -83,7 +83,7 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
     @Override
     public Object deserialize(Writable w) throws SerDeException {
         if (!(w instanceof MapWritable)) {
-            throw new SerDeException(getClass().getName() + ": expects MapWritable not "+w.getClass().getName());
+            throw new SerDeException(getClass().getName() + ": expects MapWritable not " + w.getClass().getName());
         }
 
         MapWritable columnMap = (MapWritable) w;
@@ -97,7 +97,8 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
     }
 
     /**
-     * Initialize the cassandra serialization and deserialization parameters from table properties and configuration.
+     * Initialize the cassandra serialization and deserialization parameters
+     * from table properties and configuration.
      *
      * @param job
      * @param tbl
@@ -125,11 +126,11 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
         setTableMapping();
 
         if (cassandraColumnNames.size() != serdeParams.getColumnNames().size()) {
-            throw new SerDeException(serdeName + ": columns has " +
-                    serdeParams.getColumnNames().size() +
-                    " elements while cassandra.columns.mapping has " +
-                    cassandraColumnNames.size() + " elements" +
-                    " (counting the key if implicit)");
+            throw new SerDeException(serdeName + ": columns has "
+                    + serdeParams.getColumnNames().size()
+                    + " elements while cassandra.columns.mapping has "
+                    + cassandraColumnNames.size() + " elements"
+                    + " (counting the key if implicit)");
         }
 
         // we just can make sure that "StandardColumn:" is mapped to MAP<String,?>
@@ -137,15 +138,15 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
             String cassandraColName = cassandraColumnNames.get(i);
             if (cassandraColName.endsWith(":")) {
                 TypeInfo typeInfo = serdeParams.getColumnTypes().get(i);
-                if ((typeInfo.getCategory() != Category.MAP) ||
-                        (((MapTypeInfo) typeInfo).getMapKeyTypeInfo().getTypeName()
-                                != Constants.STRING_TYPE_NAME)) {
+                if ((typeInfo.getCategory() != Category.MAP)
+                        || (((MapTypeInfo) typeInfo).getMapKeyTypeInfo().getTypeName()
+                        != Constants.STRING_TYPE_NAME)) {
 
                     throw new SerDeException(
                             serdeName + ": Cassandra column family '"
-                                    + cassandraColName
-                                    + "' should be mapped to map<string,?> but is mapped to "
-                                    + typeInfo.getTypeName());
+                            + cassandraColName
+                            + "' should be mapped to map<string,?> but is mapped to "
+                            + typeInfo.getTypeName());
                 }
             }
         }
@@ -165,13 +166,16 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
     }
 
     /**
-     * Parse or create the validator types. If <code>CASSANDRA_VALIDATOR_TYPE</code> is defined in the property,
-     * it will be used for parsing; Otherwise an empty list will be returned;
+     * Parse or create the validator types. If
+     * <code>CASSANDRA_VALIDATOR_TYPE</code> is defined in the property, it will
+     * be used for parsing; Otherwise an empty list will be returned;
      *
      * @param tbl property list
-     * @return a list of validator type or an empty list if no property is defined
-     * @throws SerDeException when the number of validator types is fewer than the number of columns or when no matching
-     *                        validator type is found in Cassandra.
+     * @return a list of validator type or an empty list if no property is
+     * defined
+     * @throws SerDeException when the number of validator types is fewer than
+     * the number of columns or when no matching validator type is found in
+     * Cassandra.
      */
     private List<AbstractType> parseOrCreateValidatorType(Properties tbl)
             throws SerDeException {
@@ -187,8 +191,8 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
             result = parseValidatorType(columnList);
 
             if (result.size() < cassandraColumnNames.size()) {
-                throw new SerDeException("There are fewer validator types defined than the column names. " +
-                        "ColumnaName size: " + cassandraColumnNames.size() + " ValidatorType size: " + result.size());
+                throw new SerDeException("There are fewer validator types defined than the column names. "
+                        + "ColumnaName size: " + cassandraColumnNames.size() + " ValidatorType size: " + result.size());
             }
         }
 
@@ -196,8 +200,8 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
     }
 
     /**
-     * Parses the cassandra columns mapping to identify the column name.
-     * One of the Hive table columns maps to the cassandra row key, by default the
+     * Parses the cassandra columns mapping to identify the column name. One of
+     * the Hive table columns maps to the cassandra row key, by default the
      * first column.
      *
      * @param columnList a list of column validator type in String format
@@ -225,7 +229,8 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
     }
 
     /**
-     * Set the table mapping. We only support transposed mapping and regular table mapping for now.
+     * Set the table mapping. We only support transposed mapping and regular
+     * table mapping for now.
      *
      * @throws SerDeException
      */
@@ -238,15 +243,14 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
     }
 
     /**
-     * Parses the cassandra columns mapping to identify the column name.
-     * One of the Hive table columns maps to the cassandra row key, by default the
+     * Parses the cassandra columns mapping to identify the column name. One of
+     * the Hive table columns maps to the cassandra row key, by default the
      * first column.
      *
      * @param columnMapping - the column mapping specification to be parsed
      * @return a list of cassandra column names
      */
-    public static List<String> parseColumnMapping(String columnMapping)
-    {
+    public static List<String> parseColumnMapping(String columnMapping) {
         assert StringUtils.isNotBlank(columnMapping);
         String[] columnArray = columnMapping.split(",");
         String[] trimmedColumnArray = trim(columnArray);
@@ -279,18 +283,18 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
         boolean hasCol = false;
         boolean hasSubCol = false;
         String transposedMapping = "";
-        for(String column : colNames) {
-            if (column.equalsIgnoreCase(CASSANDRA_SPECIAL_COLUMN_KEY)){
-                transposedMapping += ","+CASSANDRA_KEY_COLUMN;
+        for (String column : colNames) {
+            if (column.equalsIgnoreCase(CASSANDRA_SPECIAL_COLUMN_KEY)) {
+                transposedMapping += "," + CASSANDRA_KEY_COLUMN;
                 hasKey = true;
-            } else if(column.equalsIgnoreCase(CASSANDRA_SPECIAL_COLUMN_COL)){
-                transposedMapping += ","+CASSANDRA_COLUMN_COLUMN;
+            } else if (column.equalsIgnoreCase(CASSANDRA_SPECIAL_COLUMN_COL)) {
+                transposedMapping += "," + CASSANDRA_COLUMN_COLUMN;
                 hasCol = true;
-            } else if(column.equalsIgnoreCase(CASSANDRA_SPECIAL_COLUMN_SCOL)){
-                transposedMapping += ","+CASSANDRA_SUBCOLUMN_COLUMN;
+            } else if (column.equalsIgnoreCase(CASSANDRA_SPECIAL_COLUMN_SCOL)) {
+                transposedMapping += "," + CASSANDRA_SUBCOLUMN_COLUMN;
                 hasSubCol = true;
-            } else if(column.equalsIgnoreCase(CASSANDRA_SPECIAL_COLUMN_VAL)){
-                transposedMapping += ","+CASSANDRA_VALUE_COLUMN;
+            } else if (column.equalsIgnoreCase(CASSANDRA_SPECIAL_COLUMN_VAL)) {
+                transposedMapping += "," + CASSANDRA_VALUE_COLUMN;
                 hasVal = true;
             } else {
                 isTransposedTable = false;
@@ -298,9 +302,9 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
             }
         }
 
-        if(isTransposedTable && !(colNames.length == 1 && hasKey)){
+        if (isTransposedTable && !(colNames.length == 1 && hasKey)) {
 
-            if(!hasKey || !hasVal || !hasCol ) {
+            if (!hasKey || !hasVal || !hasCol) {
                 throw new IllegalArgumentException("Transposed table definition missing required fields!");
             }
 
@@ -330,7 +334,7 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
      * @param tblColumnStr hive table column names
      */
     public static String createColumnMappingString(String tblColumnStr) {
-        if(StringUtils.isBlank(tblColumnStr)) {
+        if (StringUtils.isBlank(tblColumnStr)) {
             throw new IllegalArgumentException("table must have columns");
         }
 
@@ -340,9 +344,10 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
     }
 
     /**
-     * Parse the column mappping from table properties. If cassandra.columns.mapping
-     * is defined in the property, use it to create the mapping. Otherwise, create the mapping from table
-     * columns using the default mapping.
+     * Parse the column mappping from table properties. If
+     * cassandra.columns.mapping is defined in the property, use it to create
+     * the mapping. Otherwise, create the mapping from table columns using the
+     * default mapping.
      *
      * @param tbl table properties
      * @return A list of column names
@@ -374,14 +379,14 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
     }
 
     /**
-     * Return if a table is a transposed. A table is transposed when the column mapping is like
-     * (:key, :column, :value) or (:key, :column, :subcolumn, :value).
+     * Return if a table is a transposed. A table is transposed when the column
+     * mapping is like (:key, :column, :value) or (:key, :column, :subcolumn,
+     * :value).
      *
      * @return true if a table is transposed, otherwise false
      */
-    public static boolean isTransposed(List<String> columnNames)
-    {
-        if(columnNames == null || columnNames.size() == 0) {
+    public static boolean isTransposed(List<String> columnNames) {
+        if (columnNames == null || columnNames.size() == 0) {
             throw new IllegalArgumentException("no cassandra column information found");
         }
 
@@ -405,11 +410,11 @@ public class CassandraColumnSerDe extends AbstractCassandraSerDe {
         }
 
         //only requested row key
-        if(columnNames.size() == 1 && hasKey) {
+        if (columnNames.size() == 1 && hasKey) {
             return false;
         }
 
-        if(!hasKey || !hasValue || !hasColumn) {
+        if (!hasKey || !hasValue || !hasColumn) {
             return false;
         }
 

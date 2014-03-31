@@ -18,113 +18,114 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * This represents a standard column family. It implements hadoop Writable interface.
+ * This represents a standard column family. It implements hadoop Writable
+ * interface.
  */
 public class CqlPut extends CassandraAbstractPut implements Writable {
 
-  private ByteBuffer key;
-  private List<CqlColumn> columns;
+    private ByteBuffer key;
+    private List<CqlColumn> columns;
 
-  public CqlPut() {
-    columns = new ArrayList<CqlColumn>();
-  }
-
-  public CqlPut(ByteBuffer key) {
-    this();
-    this.key = key;
-  }
-
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    int keyLen = in.readInt();
-    byte[] keyBytes = new byte[keyLen];
-    in.readFully(keyBytes);
-    key = ByteBuffer.wrap(keyBytes);
-    int ilevel = in.readInt();
-    int cols = in.readInt();
-    for (int i = 0; i < cols; i++) {
-      CqlColumn cc = new CqlColumn();
-      cc.readFields(in);
-      columns.add(cc);
+    public CqlPut() {
+        columns = new ArrayList<CqlColumn>();
     }
-  }
 
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeInt(key.remaining());
-    out.write(ByteBufferUtil.getArray(key));
-    out.writeInt(1);
-    out.writeInt(columns.size());
-    for (CqlColumn c : columns) {
-      c.write(out);
+    public CqlPut(ByteBuffer key) {
+        this();
+        this.key = key;
     }
-  }
 
-  public ByteBuffer getKey() {
-    return key;
-  }
-
-  public void setKey(ByteBuffer key) {
-    this.key = key;
-  }
-
-  public List<CqlColumn> getColumns() {
-    return columns;
-  }
-
-  public void setColumns(List<CqlColumn> columns) {
-    this.columns = columns;
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("key: ");
-    sb.append(this.key);
-    for (CqlColumn col : this.columns) {
-      sb.append("column : [");
-      sb.append(col.toString());
-      sb.append("]");
+    @Override
+    public void readFields(DataInput in) throws IOException {
+        int keyLen = in.readInt();
+        byte[] keyBytes = new byte[keyLen];
+        in.readFully(keyBytes);
+        key = ByteBuffer.wrap(keyBytes);
+        int ilevel = in.readInt();
+        int cols = in.readInt();
+        for (int i = 0; i < cols; i++) {
+            CqlColumn cc = new CqlColumn();
+            cc.readFields(in);
+            columns.add(cc);
+        }
     }
-    return sb.toString();
-  }
 
-  @Override
-  public void write(String keySpace, CassandraProxyClient client, JobConf jc) throws IOException {
-    ConsistencyLevel flevel = getConsistencyLevel(jc);
+    @Override
+    public void write(DataOutput out) throws IOException {
+        out.writeInt(key.remaining());
+        out.write(ByteBufferUtil.getArray(key));
+        out.writeInt(1);
+        out.writeInt(columns.size());
+        for (CqlColumn c : columns) {
+            c.write(out);
+        }
+    }
 
-      List<ByteBuffer> values = new ArrayList<ByteBuffer>();
+    public ByteBuffer getKey() {
+        return key;
+    }
 
-      StringBuilder valuesBuilder = new StringBuilder(" VALUES (");
-      StringBuilder queryBuilder = new StringBuilder("INSERT INTO ");
-      queryBuilder.append(jc.get(AbstractCassandraSerDe.CASSANDRA_CF_NAME));
-      queryBuilder.append("(");
-      Iterator<CqlColumn> iter = columns.iterator();
-      while (iter.hasNext()){
-          CqlColumn column = iter.next();
-          String columnName = new String(column.getColumn());
-          queryBuilder.append(columnName);
-          valuesBuilder.append("?");
-          values.add(ByteBuffer.wrap(column.getValue()));
-          if(iter.hasNext()){
-              queryBuilder.append(",");
-              valuesBuilder.append(",");
-          }
-      }
-      queryBuilder.append(")");
-      valuesBuilder.append(")");
+    public void setKey(ByteBuffer key) {
+        this.key = key;
+    }
 
-      queryBuilder.append(valuesBuilder);
+    public List<CqlColumn> getColumns() {
+        return columns;
+    }
 
-      try {
-          //tODO check compression
-          client.getProxyConnection().set_keyspace(keySpace);
-          CqlPreparedResult result = client.getProxyConnection().prepare_cql3_query(ByteBufferUtil.bytes(queryBuilder.toString()), Compression.NONE);
-          client.getProxyConnection().execute_prepared_cql3_query(result.itemId, values, flevel);
-      } catch (InvalidRequestException e) {
-          throw new IOException(e);
-      } catch (TException e) {
-          throw new IOException(e);
-      } 
-  }
+    public void setColumns(List<CqlColumn> columns) {
+        this.columns = columns;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("key: ");
+        sb.append(this.key);
+        for (CqlColumn col : this.columns) {
+            sb.append("column : [");
+            sb.append(col.toString());
+            sb.append("]");
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public void write(String keySpace, CassandraProxyClient client, JobConf jc) throws IOException {
+        ConsistencyLevel flevel = getConsistencyLevel(jc);
+
+        List<ByteBuffer> values = new ArrayList<ByteBuffer>();
+
+        StringBuilder valuesBuilder = new StringBuilder(" VALUES (");
+        StringBuilder queryBuilder = new StringBuilder("INSERT INTO ");
+        queryBuilder.append(jc.get(AbstractCassandraSerDe.CASSANDRA_CF_NAME));
+        queryBuilder.append("(");
+        Iterator<CqlColumn> iter = columns.iterator();
+        while (iter.hasNext()) {
+            CqlColumn column = iter.next();
+            String columnName = new String(column.getColumn());
+            queryBuilder.append(columnName);
+            valuesBuilder.append("?");
+            values.add(ByteBuffer.wrap(column.getValue()));
+            if (iter.hasNext()) {
+                queryBuilder.append(",");
+                valuesBuilder.append(",");
+            }
+        }
+        queryBuilder.append(")");
+        valuesBuilder.append(")");
+
+        queryBuilder.append(valuesBuilder);
+
+        try {
+            //tODO check compression
+            client.getProxyConnection().set_keyspace(keySpace);
+            CqlPreparedResult result = client.getProxyConnection().prepare_cql3_query(ByteBufferUtil.bytes(queryBuilder.toString()), Compression.NONE);
+            client.getProxyConnection().execute_prepared_cql3_query(result.itemId, values, flevel);
+        } catch (InvalidRequestException e) {
+            throw new IOException(e);
+        } catch (TException e) {
+            throw new IOException(e);
+        }
+    }
 }

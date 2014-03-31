@@ -53,12 +53,11 @@ public class HiveCassandraStandardColumnInputFormat extends InputFormat<BytesWri
 
     @Override
     public RecordReader<BytesWritable, MapWritable> getRecordReader(InputSplit split,
-                                                                    JobConf jobConf, final Reporter reporter) throws IOException {
+            JobConf jobConf, final Reporter reporter) throws IOException {
         HiveCassandraStandardSplit cassandraSplit = (HiveCassandraStandardSplit) split;
 
         List<String> columns = CassandraColumnSerDe.parseColumnMapping(cassandraSplit.getColumnMapping());
         isTransposed = CassandraColumnSerDe.isTransposed(columns);
-
 
         List<Integer> readColIDs = ColumnProjectionUtils.getReadColumnIDs(jobConf);
 
@@ -107,7 +106,6 @@ public class HiveCassandraStandardColumnInputFormat extends InputFormat<BytesWri
             predicate.setColumn_names(getColumnNames(iKey, columns, readColIDs));
         }
 
-
         try {
 
             boolean wideRows = false;
@@ -143,7 +141,6 @@ public class HiveCassandraStandardColumnInputFormat extends InputFormat<BytesWri
             throw new IOException(ie);
         }
     }
-
 
     @Override
     public InputSplit[] getSplits(JobConf jobConf, int numSplits) throws IOException {
@@ -207,12 +204,11 @@ public class HiveCassandraStandardColumnInputFormat extends InputFormat<BytesWri
     }
 
     /**
-     * Return a list of columns names to read from cassandra. The column defined as the key in the
-     * column mapping
-     * should be skipped.
+     * Return a list of columns names to read from cassandra. The column defined
+     * as the key in the column mapping should be skipped.
      *
-     * @param iKey       the index of the key defined in the column mappping
-     * @param columns    column mapping
+     * @param iKey the index of the key defined in the column mappping
+     * @param columns column mapping
      * @param readColIDs column names to read from cassandra
      */
     private List<ByteBuffer> getColumnNames(int iKey, List<String> columns, List<Integer> readColIDs) {
@@ -236,7 +232,6 @@ public class HiveCassandraStandardColumnInputFormat extends InputFormat<BytesWri
         return cfif.getSplits(context);
     }
 
-
     @Override
     public org.apache.hadoop.mapreduce.RecordReader<BytesWritable, MapWritable> createRecordReader(
             org.apache.hadoop.mapreduce.InputSplit arg0, TaskAttemptContext tac) throws IOException,
@@ -246,17 +241,20 @@ public class HiveCassandraStandardColumnInputFormat extends InputFormat<BytesWri
     }
 
     /**
-     * Look for a filter predicate pushed down by the StorageHandler. If a filter was pushed
-     * down, the filter expression and the list of indexed columns should be set in the
-     * JobConf properties. If either is not set, we can't deal with the filter here so return
-     * null. If both are present in the JobConf, translate the filter expression into a list of C*
-     * IndexExpressions which we'll later use in queries. The filter expression should translate exactly
-     * to IndexExpressions, as our HiveStoragePredicateHandler implementation has already done this
-     * once. As an additional check, if this is no longer the case & there is some residual predicate
-     * after translation, throw an Exception.
+     * Look for a filter predicate pushed down by the StorageHandler. If a
+     * filter was pushed down, the filter expression and the list of indexed
+     * columns should be set in the JobConf properties. If either is not set, we
+     * can't deal with the filter here so return null. If both are present in
+     * the JobConf, translate the filter expression into a list of C*
+     * IndexExpressions which we'll later use in queries. The filter expression
+     * should translate exactly to IndexExpressions, as our
+     * HiveStoragePredicateHandler implementation has already done this once. As
+     * an additional check, if this is no longer the case & there is some
+     * residual predicate after translation, throw an Exception.
      *
      * @param jobConf Job Configuration
-     * @return C* IndexExpressions representing the pushed down filter or null pushdown is not possible
+     * @return C* IndexExpressions representing the pushed down filter or null
+     * pushdown is not possible
      * @throws IOException if there are problems deserializing from the JobConf
      */
     private List<IndexExpression> parseFilterPredicate(JobConf jobConf) throws IOException {

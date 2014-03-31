@@ -9,28 +9,27 @@ import org.apache.hadoop.hive.serde2.lazy.objectinspector.primitive.LazyBooleanO
  * CassandraLazyLong parses the object into BooleanWritable value.
  *
  */
-public class CassandraLazyBoolean extends LazyBoolean
-{
-  public CassandraLazyBoolean(LazyBooleanObjectInspector oi) {
-    super(oi);
-  }
+public class CassandraLazyBoolean extends LazyBoolean {
 
-  @Override
-  public void init(ByteArrayRef bytes, int start, int length) {
-
-    if ( length == 1 ) {
-      try {
-        ByteBuffer buf = ByteBuffer.wrap(bytes.getData(), start, length);
-        data.set(BooleanSerializer.instance.deserialize(buf));
-        isNull = false;
-        return;
-      } catch (Throwable ie) {
-        isNull = true;
-      }
+    public CassandraLazyBoolean(LazyBooleanObjectInspector oi) {
+        super(oi);
     }
 
-    super.init(bytes, start, length);
-  }
+    @Override
+    public void init(ByteArrayRef bytes, int start, int length) {
+
+        if (length == 1) {
+            try {
+                ByteBuffer buf = ByteBuffer.wrap(bytes.getData(), start, length);
+                data.set(BooleanSerializer.instance.deserialize(buf));
+                isNull = false;
+                return;
+            } catch (Throwable ie) {
+                isNull = true;
+            }
+        }
+
+        super.init(bytes, start, length);
+    }
 
 }
-

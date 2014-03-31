@@ -20,31 +20,27 @@ package org.apache.cassandra.hadoop2;
  * under the License.
  *
  */
-
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+public class Progressable {
 
-public class Progressable
-{
     private TaskAttemptContext context;
     private org.apache.hadoop.util.Progressable progressable;
 
-    public Progressable(TaskAttemptContext context)
-    {
+    public Progressable(TaskAttemptContext context) {
         this.context = context;
     }
 
-    public Progressable(org.apache.hadoop.util.Progressable progressable)
-    {
+    public Progressable(org.apache.hadoop.util.Progressable progressable) {
         this.progressable = progressable;
     }
 
-    public void progress()
-    {
-        if (context != null)
+    public void progress() {
+        if (context != null) {
             context.progress();
-        else
+        } else {
             progressable.progress();
+        }
     }
 
 }

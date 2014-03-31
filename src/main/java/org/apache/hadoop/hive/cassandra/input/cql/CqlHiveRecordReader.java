@@ -1,7 +1,6 @@
 package org.apache.hadoop.hive.cassandra.input.cql;
 
 import org.apache.cassandra.hadoop2.cql3.CqlPagingRecordReader;
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
@@ -20,77 +19,77 @@ import java.util.Map;
 public class CqlHiveRecordReader extends RecordReader<MapWritableComparable, MapWritable>
         implements org.apache.hadoop.mapred.RecordReader<MapWritableComparable, MapWritable> {
 
-  static final Logger LOG = LoggerFactory.getLogger(CqlHiveRecordReader.class);
+    static final Logger LOG = LoggerFactory.getLogger(CqlHiveRecordReader.class);
 
-  //private final boolean isTransposed;
-  private final CqlPagingRecordReader cfrr;
-  private Iterator<Map.Entry<String, ByteBuffer>> columnIterator = null;
-  private Map.Entry<String, ByteBuffer> currentEntry;
-  //private Iterator<IColumn> subColumnIterator = null;
-  private MapWritableComparable currentKey = null;
-  private final MapWritable currentValue = new MapWritable();
+    //private final boolean isTransposed;
+    private final CqlPagingRecordReader cfrr;
+    private Iterator<Map.Entry<String, ByteBuffer>> columnIterator = null;
+    private Map.Entry<String, ByteBuffer> currentEntry;
+    //private Iterator<IColumn> subColumnIterator = null;
+    private MapWritableComparable currentKey = null;
+    private final MapWritable currentValue = new MapWritable();
 
-  public CqlHiveRecordReader(CqlPagingRecordReader cprr) { //, boolean isTransposed) {
-    this.cfrr = cprr;
-    //this.isTransposed = isTransposed;
-  }
-
-  @Override
-  public void close() throws IOException {
-    cfrr.close();
-  }
-
-  @Override
-  public MapWritableComparable createKey() {
-    return new MapWritableComparable();
-  }
-
-  @Override
-  public MapWritable createValue() {
-    return new MapWritable();
-  }
-
-  @Override
-  public long getPos() throws IOException {
-    return cfrr.getPos();
-  }
-
-  @Override
-  public float getProgress() throws IOException {
-    return cfrr.getProgress();
-  }
-
-  public static int callCount = 0;
-
-  @Override
-  public boolean next(MapWritableComparable key, MapWritable value) throws IOException {
-    if (!nextKeyValue()) {
-      return false;
+    public CqlHiveRecordReader(CqlPagingRecordReader cprr) { //, boolean isTransposed) {
+        this.cfrr = cprr;
+        //this.isTransposed = isTransposed;
     }
 
-    key.clear();
-    key.putAll(getCurrentKey());
+    @Override
+    public void close() throws IOException {
+        cfrr.close();
+    }
 
-    value.clear();
-    value.putAll(getCurrentValue());
+    @Override
+    public MapWritableComparable createKey() {
+        return new MapWritableComparable();
+    }
 
-    return true;
-  }
+    @Override
+    public MapWritable createValue() {
+        return new MapWritable();
+    }
 
-  @Override
-  public MapWritableComparable getCurrentKey() {
-    return currentKey;
-  }
+    @Override
+    public long getPos() throws IOException {
+        return cfrr.getPos();
+    }
 
-  @Override
-  public MapWritable getCurrentValue() {
-    return currentValue;
-  }
+    @Override
+    public float getProgress() throws IOException {
+        return cfrr.getProgress();
+    }
 
-  @Override
-  public void initialize(InputSplit split, TaskAttemptContext context) throws IOException {
-    cfrr.initialize(split, context);
-  }
+    public static int callCount = 0;
+
+    @Override
+    public boolean next(MapWritableComparable key, MapWritable value) throws IOException {
+        if (!nextKeyValue()) {
+            return false;
+        }
+
+        key.clear();
+        key.putAll(getCurrentKey());
+
+        value.clear();
+        value.putAll(getCurrentValue());
+
+        return true;
+    }
+
+    @Override
+    public MapWritableComparable getCurrentKey() {
+        return currentKey;
+    }
+
+    @Override
+    public MapWritable getCurrentValue() {
+        return currentValue;
+    }
+
+    @Override
+    public void initialize(InputSplit split, TaskAttemptContext context) throws IOException {
+        cfrr.initialize(split, context);
+    }
 
     private BytesWritable convertByteBuffer(ByteBuffer val) {
         if (val == null) {
@@ -98,69 +97,51 @@ public class CqlHiveRecordReader extends RecordReader<MapWritableComparable, Map
         }
         int length = val.remaining();
         int boff = val.arrayOffset() + val.position();
-       // LOG.debug("size............................"+val.array().length);
-       // LOG.debug("buffer............................"+val.toString());
+        // LOG.debug("size............................"+val.array().length);
+        // LOG.debug("buffer............................"+val.toString());
         if (boff == 0 && length == val.array().length) {
             BytesWritable table = new BytesWritable(val.array());
-          //  String s2 = new String(table.copyBytes());
-         //   LOG.debug("buffer............................"+s2);
+            //  String s2 = new String(table.copyBytes());
+            //   LOG.debug("buffer............................"+s2);
             return table;
         } else {
-            BytesWritable table =new BytesWritable(Arrays.copyOfRange(val.array(), boff, boff + length));
-           // String s2 = new String(table.copyBytes());
-           // LOG.debug("buffer............................"+s2);
+            BytesWritable table = new BytesWritable(Arrays.copyOfRange(val.array(), boff, boff + length));
+            // String s2 = new String(table.copyBytes());
+            // LOG.debug("buffer............................"+s2);
             return table;
         }
-        
 
     }
 
-  @Override
-  public boolean nextKeyValue() throws IOException {
+    @Override
+    public boolean nextKeyValue() throws IOException {
 
-    boolean next = false;
+        boolean next = false;
 
-    // In the case that we are transposing we create a fixed set of columns
-    // per cassandra column
-    next = cfrr.nextKeyValue();
+        // In the case that we are transposing we create a fixed set of columns
+        // per cassandra column
+        next = cfrr.nextKeyValue();
 
-    currentValue.clear();
+        currentValue.clear();
 
-    if (next) {
-      currentKey = mapToMapWritable(cfrr.getCurrentKey());
+        if (next) {
+            currentKey = mapToMapWritable(cfrr.getCurrentKey());
 
-      // rowKey
-      currentValue.putAll(currentKey);
-      currentValue.putAll(mapToMapWritable(cfrr.getCurrentValue()));
-      //populateMap(cfrr.getCurrentValue(), currentValue);
+            // rowKey
+            currentValue.putAll(currentKey);
+            currentValue.putAll(mapToMapWritable(cfrr.getCurrentValue()));
+            //populateMap(cfrr.getCurrentValue(), currentValue);
+        }
+
+        return next;
     }
 
-    return next;
-  }
-
-  private MapWritableComparable mapToMapWritable(Map<String, ByteBuffer> map) {
-    MapWritableComparable mw = new MapWritableComparable();
-    for (Map.Entry<String, ByteBuffer> e : map.entrySet()) {
-      mw.put(new Text(e.getKey()), convertByteBuffer(e.getValue()));
+    private MapWritableComparable mapToMapWritable(Map<String, ByteBuffer> map) {
+        MapWritableComparable mw = new MapWritableComparable();
+        for (Map.Entry<String, ByteBuffer> e : map.entrySet()) {
+            mw.put(new Text(e.getKey()), convertByteBuffer(e.getValue()));
+        }
+        return mw;
     }
-    return mw;
-  }
 
-/*  private void populateMap(Map<Map<String, ByteBuffer>, Map<String, ByteBuffer>> cvalue, MapWritable value) {
-    for (Map.Entry<Map<String, ByteBuffer>, Map<String, ByteBuffer>> e : cvalue.entrySet()) {
-      Map<String, ByteBuffer> k = e.getKey();
-      Map<String, ByteBuffer> v = e.getValue();
-
-
-      if (!v.isLive()) {
-        continue;
-      }
-
-
-      BytesWritable newKey = k);
-      BytesWritable newValue = convertByteBuffer(v.value());
-
-      value.put(newKey, newValue);
-    }
-  } */
 }

@@ -9,27 +9,26 @@ import org.apache.hadoop.hive.serde2.lazy.objectinspector.primitive.LazyFloatObj
  * CassandraLazyFloat parses the object into FloatWritable value.
  *
  */
-public class CassandraLazyFloat extends LazyFloat
-{
-  public CassandraLazyFloat(LazyFloatObjectInspector oi) {
-    super(oi);
-  }
+public class CassandraLazyFloat extends LazyFloat {
 
-  @Override
-  public void init(ByteArrayRef bytes, int start, int length) {
-
-    if ( length == 4 ) {
-      try {
-        ByteBuffer buf = ByteBuffer.wrap(bytes.getData(), start, length);
-        data.set(FloatType.instance.compose(buf));
-        isNull = false;
-        return;
-      } catch (Throwable ie) {
-        //we are unable to parse the data, try to parse it in the hive lazy way.
-      }
+    public CassandraLazyFloat(LazyFloatObjectInspector oi) {
+        super(oi);
     }
 
-    super.init(bytes, start, length);
-  }
-}
+    @Override
+    public void init(ByteArrayRef bytes, int start, int length) {
 
+        if (length == 4) {
+            try {
+                ByteBuffer buf = ByteBuffer.wrap(bytes.getData(), start, length);
+                data.set(FloatType.instance.compose(buf));
+                isNull = false;
+                return;
+            } catch (Throwable ie) {
+                //we are unable to parse the data, try to parse it in the hive lazy way.
+            }
+        }
+
+        super.init(bytes, start, length);
+    }
+}

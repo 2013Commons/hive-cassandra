@@ -9,27 +9,26 @@ import org.apache.hadoop.hive.serde2.lazy.objectinspector.primitive.LazyTimestam
  * CassandraLazyTimestamp parses the object into TimestampWritable value.
  *
  */
-public class CassandraLazyTimestamp extends LazyTimestamp
-{
-  public CassandraLazyTimestamp(LazyTimestampObjectInspector oi) {
-    super(oi);
-  }
+public class CassandraLazyTimestamp extends LazyTimestamp {
 
-  @Override
-  public void init(ByteArrayRef bytes, int start, int length) {
-
-    if ( length == 8 ) {
-      try {
-        ByteBuffer buf = ByteBuffer.wrap(bytes.getData(), start, length);
-        data.set(new Timestamp(buf.getLong(buf.position())));
-        isNull = false;
-        return;
-      } catch (Throwable ie) {
-        //we are unable to parse the data, try to parse it in the hive lazy way.
-      }
+    public CassandraLazyTimestamp(LazyTimestampObjectInspector oi) {
+        super(oi);
     }
 
-    super.init(bytes, start, length);
-  }
-}
+    @Override
+    public void init(ByteArrayRef bytes, int start, int length) {
 
+        if (length == 8) {
+            try {
+                ByteBuffer buf = ByteBuffer.wrap(bytes.getData(), start, length);
+                data.set(new Timestamp(buf.getLong(buf.position())));
+                isNull = false;
+                return;
+            } catch (Throwable ie) {
+                //we are unable to parse the data, try to parse it in the hive lazy way.
+            }
+        }
+
+        super.init(bytes, start, length);
+    }
+}

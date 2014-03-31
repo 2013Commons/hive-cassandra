@@ -23,51 +23,51 @@ import java.util.Properties;
 public class HiveCqlOutputFormat implements HiveOutputFormat<Text, CqlPut>,
         OutputFormat<Text, CqlPut> {
 
-  static final Logger LOG = LoggerFactory.getLogger(HiveCqlOutputFormat.class);
+    static final Logger LOG = LoggerFactory.getLogger(HiveCqlOutputFormat.class);
 
-  @Override
-  public RecordWriter getHiveRecordWriter(final JobConf jc, Path finalOutPath,
-                                          Class<? extends Writable> valueClass, boolean isCompressed, Properties tableProperties,
-                                          Progressable progress) throws IOException {
+    @Override
+    public RecordWriter getHiveRecordWriter(final JobConf jc, Path finalOutPath,
+            Class<? extends Writable> valueClass, boolean isCompressed, Properties tableProperties,
+            Progressable progress) throws IOException {
 
-    final String cassandraKeySpace = jc.get(AbstractCassandraSerDe.CASSANDRA_KEYSPACE_NAME);
-    final String cassandraHost = jc.get(AbstractCassandraSerDe.CASSANDRA_HOST);
-    final int cassandraPort = Integer.parseInt(jc.get(AbstractCassandraSerDe.CASSANDRA_PORT));
+        final String cassandraKeySpace = jc.get(AbstractCassandraSerDe.CASSANDRA_KEYSPACE_NAME);
+        final String cassandraHost = jc.get(AbstractCassandraSerDe.CASSANDRA_HOST);
+        final int cassandraPort = Integer.parseInt(jc.get(AbstractCassandraSerDe.CASSANDRA_PORT));
 
-    final CassandraProxyClient client;
-    try {
-      client = new CassandraProxyClient(
-              cassandraHost, cassandraPort, true, true);
-    } catch (CassandraException e) {
-      throw new IOException(e);
+        final CassandraProxyClient client;
+        try {
+            client = new CassandraProxyClient(
+                    cassandraHost, cassandraPort, true, true);
+        } catch (CassandraException e) {
+            throw new IOException(e);
+        }
+
+        return new RecordWriter() {
+
+            @Override
+            public void close(boolean abort) throws IOException {
+                if (client != null) {
+                    client.close();
+                }
+            }
+
+            @Override
+            public void write(Writable w) throws IOException {
+                Put put = (Put) w;
+                put.write(cassandraKeySpace, client, jc);
+            }
+
+        };
     }
 
-    return new RecordWriter() {
+    @Override
+    public void checkOutputSpecs(FileSystem arg0, JobConf jc) throws IOException {
 
-      @Override
-      public void close(boolean abort) throws IOException {
-        if (client != null) {
-          client.close();
-        }
-      }
+    }
 
-      @Override
-      public void write(Writable w) throws IOException {
-        Put put = (Put) w;
-        put.write(cassandraKeySpace, client, jc);
-      }
-
-    };
-  }
-
-  @Override
-  public void checkOutputSpecs(FileSystem arg0, JobConf jc) throws IOException {
-
-  }
-
-  @Override
-  public org.apache.hadoop.mapred.RecordWriter<Text, CqlPut> getRecordWriter(FileSystem arg0,
-                                                                             JobConf arg1, String arg2, Progressable arg3) throws IOException {
-    throw new RuntimeException("Error: Hive should not invoke this method.");
-  }
+    @Override
+    public org.apache.hadoop.mapred.RecordWriter<Text, CqlPut> getRecordWriter(FileSystem arg0,
+            JobConf arg1, String arg2, Progressable arg3) throws IOException {
+        throw new RuntimeException("Error: Hive should not invoke this method.");
+    }
 }

@@ -17,7 +17,6 @@
  */
 package org.apache.cassandra.hadoop2;
 
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.*;
@@ -33,7 +32,6 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.thrift.transport.TTransport;
 
-
 /**
  * The <code>ColumnFamilyRecordWriter</code> maps the output &lt;key, value&gt;
  * pairs to a Cassandra column family. In particular, it applies all mutations
@@ -42,14 +40,14 @@ import org.apache.thrift.transport.TTransport;
  *
  * <p>
  * Furthermore, this writer groups the mutations by the endpoint responsible for
- * the rows being affected. This allows the mutations to be executed in parallel,
- * directly to a responsible endpoint.
+ * the rows being affected. This allows the mutations to be executed in
+ * parallel, directly to a responsible endpoint.
  * </p>
  *
  * @see ColumnFamilyOutputFormat
  */
-public abstract class AbstractColumnFamilyRecordWriter<K, Y> extends RecordWriter<K, Y> implements org.apache.hadoop.mapred.RecordWriter<K, Y>
-{
+public abstract class AbstractColumnFamilyRecordWriter<K, Y> extends RecordWriter<K, Y> implements org.apache.hadoop.mapred.RecordWriter<K, Y> {
+
     // The configuration this writer is associated with.
     protected final Configuration conf;
 
@@ -68,15 +66,14 @@ public abstract class AbstractColumnFamilyRecordWriter<K, Y> extends RecordWrite
     protected final ConsistencyLevel consistencyLevel;
     protected Progressable progressable;
 
-    protected AbstractColumnFamilyRecordWriter(Configuration conf)
-    {
+    protected AbstractColumnFamilyRecordWriter(Configuration conf) {
         this.conf = conf;
         this.ringCache = new RingCache(conf);
         this.queueSize = conf.getInt(AbstractColumnFamilyOutputFormat.QUEUE_SIZE, 32 * FBUtilities.getAvailableProcessors());
         batchThreshold = conf.getLong(AbstractColumnFamilyOutputFormat.BATCH_THRESHOLD, 32);
         consistencyLevel = ConsistencyLevel.valueOf(ConfigHelper.getWriteConsistencyLevel(conf));
     }
-    
+
     /**
      * Close this <code>RecordWriter</code> to future operations, but not before
      * flushing out the batched mutations.
@@ -84,26 +81,27 @@ public abstract class AbstractColumnFamilyRecordWriter<K, Y> extends RecordWrite
      * @param context the context of the task
      * @throws IOException
      */
-    public void close(TaskAttemptContext context) throws IOException, InterruptedException
-    {
+    public void close(TaskAttemptContext context) throws IOException, InterruptedException {
         close();
     }
 
-    /** Fills the deprecated RecordWriter interface for streaming. */
+    /**
+     * Fills the deprecated RecordWriter interface for streaming.
+     */
     @Deprecated
-    public void close(org.apache.hadoop.mapred.Reporter reporter) throws IOException
-    {
+    public void close(org.apache.hadoop.mapred.Reporter reporter) throws IOException {
         close();
     }
-    
+
     protected abstract void close() throws IOException;
 
     /**
-     * A client that runs in a threadpool and connects to the list of endpoints for a particular
-     * range. Mutations for keys in that range are sent to this client via a queue.
+     * A client that runs in a threadpool and connects to the list of endpoints
+     * for a particular range. Mutations for keys in that range are sent to this
+     * client via a queue.
      */
-    public abstract class AbstractRangeClient<K> extends Thread
-    {
+    public abstract class AbstractRangeClient<K> extends Thread {
+
         // The list of endpoints for this range
         protected final List<InetAddress> endpoints;
         // A bounded queue of incoming mutations for this range
@@ -119,60 +117,53 @@ public abstract class AbstractColumnFamilyRecordWriter<K, Y> extends RecordWrite
 
         /**
          * Constructs an {@link AbstractRangeClient} for the given endpoints.
+         *
          * @param endpoints the possible endpoints to execute the mutations on
          */
-        public AbstractRangeClient(List<InetAddress> endpoints)
-        {
+        public AbstractRangeClient(List<InetAddress> endpoints) {
             super("client-" + endpoints);
             this.endpoints = endpoints;
-         }
+        }
 
         /**
          * enqueues the given value to Cassandra
          */
-        public void put(K value) throws IOException
-        {
-            while (true)
-            {
-                if (lastException != null)
+        public void put(K value) throws IOException {
+            while (true) {
+                if (lastException != null) {
                     throw lastException;
-                try
-                {
-                    if (queue.offer(value, 100, TimeUnit.MILLISECONDS))
-                        break;
                 }
-                catch (InterruptedException e)
-                {
+                try {
+                    if (queue.offer(value, 100, TimeUnit.MILLISECONDS)) {
+                        break;
+                    }
+                } catch (InterruptedException e) {
                     throw new AssertionError(e);
                 }
             }
         }
 
-        public void close() throws IOException
-        {
+        public void close() throws IOException {
             // stop the run loop.  this will result in closeInternal being called by the time join() finishes.
             run = false;
             interrupt();
-            try
-            {
+            try {
                 this.join();
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 throw new AssertionError(e);
             }
 
-            if (lastException != null)
+            if (lastException != null) {
                 throw lastException;
+            }
         }
 
-        protected void closeInternal()
-        {
-            if (client != null)
-            {
+        protected void closeInternal() {
+            if (client != null) {
                 TTransport transport = client.getOutputProtocol().getTransport();
-                if (transport.isOpen())
+                if (transport.isOpen()) {
                     transport.close();
+                }
             }
         }
 
@@ -182,10 +173,8 @@ public abstract class AbstractColumnFamilyRecordWriter<K, Y> extends RecordWrite
         public abstract void run();
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return "#<Client for " + endpoints.toString() + ">";
         }
     }
 }
-

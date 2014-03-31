@@ -24,8 +24,8 @@ public class CqlRegularTableMapping extends TableMapping {
 
     @Override
     public Writable getWritable(List<? extends StructField> fields,
-                                List<Object> list,
-                                List<? extends StructField> declaredFields) throws IOException {
+            List<Object> list,
+            List<? extends StructField> declaredFields) throws IOException {
         return write(fields, list, declaredFields);
     }
 

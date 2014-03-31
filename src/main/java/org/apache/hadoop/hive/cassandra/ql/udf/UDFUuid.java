@@ -11,16 +11,16 @@ import org.apache.hadoop.io.Text;
 
 @UDFType(deterministic = true)
 @Description(name = "to_uuid",
-    value = "_FUNC_([string]) - Returns a UUID parsed from an input stringa string of 32 hexidecimal characters",
-    extended = "Takes a String of 32 hexidecimal characters, \n" +
-                "split up using dashes in the standard UUID format:\n" +
-                " XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX \n" +
-                " and passes it through UUIDGen.decompose(UUID.fromString(str))")
+        value = "_FUNC_([string]) - Returns a UUID parsed from an input stringa string of 32 hexidecimal characters",
+        extended = "Takes a String of 32 hexidecimal characters, \n"
+        + "split up using dashes in the standard UUID format:\n"
+        + " XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX \n"
+        + " and passes it through UUIDGen.decompose(UUID.fromString(str))")
 
 public class UDFUuid extends UDF {
 
-  public BytesWritable evaluate(Text text){
-    return new BytesWritable(UUIDGen.decompose(UUID.fromString(new String(text.getBytes()))));
-  }
+    public BytesWritable evaluate(Text text) {
+        return new BytesWritable(UUIDGen.decompose(UUID.fromString(new String(text.getBytes()))));
+    }
 
 }
