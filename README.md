@@ -16,7 +16,7 @@ Instructions of usage:
   b. Choose Prebuild with Hadoop2, CDH4.5.0: shark-0.9.0-hadoop2-bin
                                         AMPLab's Hive 0.11: hive-0.11.0-bin
                                         
-  c. Set up shark environment as mentioned in the Shark office page.
+  c. Set up shark environment as mentioned in the Shark official page.
 
 
 2. Install the project:
@@ -100,4 +100,4 @@ https://github.com/dvasilen/Hive-Cassandra/tree/HIVE-0.11.0-HADOOP-2.0.0-CASSAND
 Cassandra 2.0 hadoop2 from project :  wibiclint / cassandra2-hadoop2
 https://github.com/wibiclint/cassandra2-hadoop2                                      
                        
-
+Shark and Hive with hadoop2 : https://groups.google.com/forum/#!topic/shark-users/XXAlk4OACe8.
