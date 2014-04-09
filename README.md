@@ -13,7 +13,7 @@ Instructions of usage:
 
   a. Download Shark and Hive with Hadoop 2 from https://groups.google.com/forum/#!topic/shark-users/XXAlk4OACe8.
 
-  b. Choose Prebuild with Hadoop2, CDH4.5.0: shark-0.9.0-hadoop2-bin  and   AMPLab's Hive 0.11: hive-0.11.0-bin
+  b. Choose Prebuild with Hadoop2, CDH4.5.0: shark-0.9.0-hadoop2-bin  and  AMPLab's Hive 0.11: hive-0.11.0-bin
                                         
   c. Set up Shark environment as mentioned in the Shark official page (scala-2.10.3 and shark-env.sh).
 
@@ -21,7 +21,14 @@ Instructions of usage:
 2. Install the project:
 
   a. Git project and compile it.
-  b. Copy those jars to the shark(installed dir)/lib/. those jar are : cassandra-all-2.0.4.jar, cassandra-thrift-2.0.4.jar,  hive-0.11.0-hadoop-2.0.0-cassandra-2.0-0.0.1.jar, whick are in the project/target and project/target/dependency.
+  
+  b. Copy those jars to the shark(installed dir)/lib/.
+  
+    Those jar are : cassandra-all-2.0.4.jar, 
+                    cassandra-thrift-2.0.4.jar,  
+                    hive-0.11.0-hadoop-2.0.0-cassandra-2.0-0.0.1.jar,
+                    
+    whick are in the project/target and project/target/dependency.
      
      
 3. Execute: in shark directory, and run ./bin/shark.
@@ -30,6 +37,8 @@ Instructions of usage:
 That's all, and enjoy it.
 
 ========================================================================================================================
+
+
 Usage example 1:
 
 First create table in Cql:
@@ -92,14 +101,24 @@ CREATE EXTERNAL TABLE test2
 
 Example with application log that in Cassandra:
 
-CREATE TEMPORARY FUNCTION uuid  as 'org.apache.hadoop.hive.cassandra.ql.udf.UDFUuidToString';
-select uuid(key) from log_entries limit 1;
+CREATE TEMPORARY FUNCTION uuid  
+as 'org.apache.hadoop.hive.cassandra.ql.udf.UDFUuidToString';
+
 // pass binary to string
 
+select uuid(key) from log_entries limit 1;
 
-CREATE TEMPORARY FUNCTION fullString  as 'org.apache.hadoop.hive.cassandra.ql.udf.UDFFullString';
-select fullString(message) from log_entries limit 1;
+
+
+
+CREATE TEMPORARY FUNCTION fullString  
+as 'org.apache.hadoop.hive.cassandra.ql.udf.UDFFullString';
+
 // for those string that contains '\n'
+
+select fullString(message) from log_entries limit 1;
+
+
 
 example for logs that in Cassandra:
 
@@ -122,13 +141,20 @@ CREATE EXTERNAL TABLE log_entries (
   thread_name string,
   throwable_str_rep string
 )  STORED BY
+
     'org.apache.hadoop.hive.cassandra.cql.CqlStorageHandler'
+    
     WITH SERDEPROPERTIES (
+    
 "cassandra.ks.name" = "log_user_usage_history",
+
 "compression"="LZ4Compressor"
+
 ) ;
 
+
 //cache log table
+
 create table log_cache TBLPROPERTIES ("shark.cache" = "true") AS SELECT uuid(key), fullstring(message) from log_entries;
 
 
@@ -137,7 +163,9 @@ Queries:
 select count(*) from log_cache;
 
 OK
+
 148081
+
 Time taken: 2.38 seconds
 
 
@@ -152,7 +180,9 @@ insert into table log_cache  SELECT uuid(key), fullstring(message) from log_entr
 select count(*) from log_cache where log like '%createUser%';
 
 OK
+
 130640
+
 Time taken: 3.374 seconds
 
 
@@ -163,8 +193,11 @@ bbc6ef58-7f4b-310d-8689-64130b077231	[83.34.124.168] [/getContentList]    ******
 select count(*) from log_cache where log like '%ahll11%' and log like '%getContent%';
 
 OK
+
 336
+
 Time taken: 3.697 seconds
+
 
 That is all the example of the usage of Shark for those logs that in cassandra. 
 
