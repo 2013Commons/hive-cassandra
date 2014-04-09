@@ -15,7 +15,7 @@ Instructions of usage:
 
   b. Choose Prebuild with Hadoop2, CDH4.5.0: shark-0.9.0-hadoop2-bin  and   AMPLab's Hive 0.11: hive-0.11.0-bin
                                         
-  c. Set up Shark environment as mentioned in the Shark official page.
+  c. Set up Shark environment as mentioned in the Shark official page (scala-2.10.3 and shark-env.sh).
 
 
 2. Install the project:
