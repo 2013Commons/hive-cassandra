@@ -133,6 +133,31 @@ OK
 148081
 Time taken: 2.38 seconds
 
+Another example: export data from cassandra
+
+create table log_cache (key string, log string);
+
+insert into table log_cache  SELECT uuid(key), fullstring(message) from log_entries;
+
+select count(*) from log_cache where log like '%createUser%';
+
+OK
+130640
+Time taken: 3.374 seconds
+
+
+select * from log_cache where log like '%ahll11%' and log like '%getContent%' limit 1;
+
+bbc6ef58-7f4b-310d-8689-64130b077231	[83.34.124.168] [/getContentList]    ***********
+
+select count(*) from log_cache where log like '%ahll11%' and log like '%getContent%';
+
+OK
+336
+Time taken: 3.697 seconds
+
+That is all the example of the usage of Shark for those logs that in cassandra.
+
 
 
 ========================================================================================================================
