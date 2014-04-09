@@ -97,6 +97,36 @@ CREATE TEMPORARY FUNCTION fullString  as 'org.apache.hadoop.hive.cassandra.ql.ud
 select fullString(message) from log_entries limit 1;
 // for those string that contains '\n'
 
+example for logs that in Cassandra:
+
+CREATE EXTERNAL TABLE log_entries (
+  key string,
+  app_name string,
+  app_start_time bigint,
+  class_name string,
+  file_name string,
+  host_ip string,
+  host_name string,
+  level string,
+  line_number string,
+  log_timestamp bigint,
+  logger_name string,
+  message string,
+  method_name string,
+  ndc string,
+  thread_name string,
+  throwable_str_rep string
+)  STORED BY
+    'org.apache.hadoop.hive.cassandra.cql.CqlStorageHandler'
+    WITH SERDEPROPERTIES (
+"cassandra.ks.name" = "log_user_usage_history",
+"compression"="LZ4Compressor"
+) ;
+
+create table log_cache TBLPROPERTIES ("shark.cache" = "true") AS SELECT uuid(key) from log_entries;
+
+
+
 
 ========================================================================================================================
 References:
