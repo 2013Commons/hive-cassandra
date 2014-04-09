@@ -88,7 +88,14 @@ CREATE EXTERNAL TABLE test2
  INNER JOIN test2
  ON test.id=test2.id;
 
+More example:
 
+CREATE TEMPORARY FUNCTION uuid  as 'org.apache.hadoop.hive.cassandra.ql.udf.UDFUuidToString';
+select uuid(key) from log_entries limit 1;
+
+CREATE TEMPORARY FUNCTION fullString  as 'org.apache.hadoop.hive.cassandra.ql.udf.UDFFullString';
+select fullString(message) from log_entries limit 1;
+// for those string that contains '\n'
 
 
 ========================================================================================================================
