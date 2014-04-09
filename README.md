@@ -30,7 +30,7 @@ Instructions of usage:
 That's all, and enjoy it.
 
 ========================================================================================================================
-Usage example:
+Usage example 1:
 
 First create table in Cql:
 
@@ -88,16 +88,21 @@ CREATE EXTERNAL TABLE test2
  INNER JOIN test2
  ON test.id=test2.id;
 
-More example:
+==============================================================================================
+
+Example with application log that in Cassandra:
 
 CREATE TEMPORARY FUNCTION uuid  as 'org.apache.hadoop.hive.cassandra.ql.udf.UDFUuidToString';
 select uuid(key) from log_entries limit 1;
+// pass binary to string
+
 
 CREATE TEMPORARY FUNCTION fullString  as 'org.apache.hadoop.hive.cassandra.ql.udf.UDFFullString';
 select fullString(message) from log_entries limit 1;
 // for those string that contains '\n'
 
 example for logs that in Cassandra:
+
 
 CREATE EXTERNAL TABLE log_entries (
   key string,
@@ -123,9 +128,11 @@ CREATE EXTERNAL TABLE log_entries (
 "compression"="LZ4Compressor"
 ) ;
 
-create table log_cache TBLPROPERTIES ("shark.cache" = "true") AS SELECT uuid(key) from log_entries;
-
+//cache log table
 create table log_cache TBLPROPERTIES ("shark.cache" = "true") AS SELECT uuid(key), fullstring(message) from log_entries;
+
+
+Queries:
 
 select count(*) from log_cache;
 
@@ -133,11 +140,14 @@ OK
 148081
 Time taken: 2.38 seconds
 
-Another example: export data from cassandra
+
+
+Export logs from cassandra:
 
 create table log_cache (key string, log string);
 
 insert into table log_cache  SELECT uuid(key), fullstring(message) from log_entries;
+
 
 select count(*) from log_cache where log like '%createUser%';
 
@@ -156,7 +166,7 @@ OK
 336
 Time taken: 3.697 seconds
 
-That is all the example of the usage of Shark for those logs that in cassandra.
+That is all the example of the usage of Shark for those logs that in cassandra. 
 
 
 
