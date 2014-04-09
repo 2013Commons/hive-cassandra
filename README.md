@@ -45,7 +45,8 @@ First create table in Cql:
 
 cqlsh>:
 
-create KEYSPACE sharktest WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
+create KEYSPACE sharktest WITH 
+replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
 
 use sharktest;
 
@@ -101,13 +102,12 @@ CREATE EXTERNAL TABLE test2
 
 Example with application log that in Cassandra:
 
-CREATE TEMPORARY FUNCTION uuid  
+CREATE TEMPORARY FUNCTION uuid
 as 'org.apache.hadoop.hive.cassandra.ql.udf.UDFUuidToString';
 
 // pass binary to string
 
 select uuid(key) from log_entries limit 1;
-
 
 
 
@@ -140,14 +140,9 @@ CREATE EXTERNAL TABLE log_entries (
   ndc string,
   thread_name string,
   throwable_str_rep string
-)  STORED BY
-
-    'org.apache.hadoop.hive.cassandra.cql.CqlStorageHandler'
-    
+)  STORED BY 'org.apache.hadoop.hive.cassandra.cql.CqlStorageHandler'
     WITH SERDEPROPERTIES (
-    
 "cassandra.ks.name" = "log_user_usage_history",
-
 "compression"="LZ4Compressor"
 
 ) ;
@@ -155,7 +150,8 @@ CREATE EXTERNAL TABLE log_entries (
 
 //cache log table
 
-create table log_cache TBLPROPERTIES ("shark.cache" = "true") AS SELECT uuid(key), fullstring(message) from log_entries;
+create table log_cache TBLPROPERTIES ("shark.cache" = "true") 
+AS SELECT uuid(key), fullstring(message) from log_entries;
 
 
 Queries:
