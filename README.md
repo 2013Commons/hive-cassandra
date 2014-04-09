@@ -125,6 +125,13 @@ CREATE EXTERNAL TABLE log_entries (
 
 create table log_cache TBLPROPERTIES ("shark.cache" = "true") AS SELECT uuid(key) from log_entries;
 
+create table log_cache TBLPROPERTIES ("shark.cache" = "true") AS SELECT uuid(key), fullstring(message) from log_entries;
+
+select count(*) from log_cache;
+
+OK
+148081
+Time taken: 2.38 seconds
 
 
 
