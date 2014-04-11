@@ -91,6 +91,14 @@ public class CqlHiveRecordReader extends RecordReader<MapWritableComparable, Map
         cfrr.initialize(split, context);
     }
 
+    
+    /**
+     * Where we treat the buffer from cassandra, be careful with that, and make sure if
+     * you want to support the null column.
+     * 
+     * @param val
+     * @return 
+     */
     private BytesWritable convertByteBuffer(ByteBuffer val) {
         if (val == null) {
             return new BytesWritable(new byte[]{});

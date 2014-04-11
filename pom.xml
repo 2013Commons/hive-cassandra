@@ -5,7 +5,6 @@
     <version>0.0.1</version>
   
     <repositories>
-
         <repository>
             <id>cloudera-repos</id>
             <name>cloudera-repos</name>
@@ -57,28 +56,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <!--
-                            <descriptorRefs>
-                                    <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                    -->
-					
-                    <!--descriptors>
-                      <descriptor>src/assemble/filter.xml</descriptor>
-                    </descriptors-->
-                </configuration>
-                <executions>
-                    <!--
-                    <execution>
-                            <id>make-jar-with-dependencies</id>
-                            <phase>package</phase>
-                            <goals>
-                                    <goal>single</goal>
-                            </goals>
-                    </execution>
-                    -->
-                </executions>
             </plugin>
         </plugins>
     </build>
@@ -125,8 +102,7 @@
             <version>0.11.0</version>
             <type>jar</type>
             <scope>compile</scope>
-        </dependency>
-  		
+        </dependency>		
         <dependency>
             <groupId>org.apache.cassandra</groupId>
             <artifactId>cassandra-all</artifactId>
@@ -143,8 +119,7 @@
             <groupId>io.netty</groupId>
             <artifactId>netty</artifactId>
             <version>3.9.0.Final</version>
-        </dependency>
-        
+        </dependency>       
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>
