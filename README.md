@@ -13,7 +13,17 @@ Instructions of usage:
 
   a. Download Shark and Hive with Hadoop 2 from https://groups.google.com/forum/#!topic/shark-users/XXAlk4OACe8.
 
-  b. Choose Prebuild with Hadoop2, CDH4.5.0: shark-0.9.0-hadoop2-bin  and  AMPLab's Hive 0.11: hive-0.11.0-bin
+  b.  Choose Prebuild with Hadoop2, CDH4.5.0:
+  
+      shark-0.9.0-hadoop2-bin:  
+   
+      https://www.google.com/url?q=https%3A%2F%2Fdl.dropboxusercontent.com%2Fs%2Fzya05f11hohznzw%2Fshark-0.9.0-hadoop2-bin.tgz%3Fdl%3D1%26token_hash%3DAAEjSNRvO4KmXnRMnJptoifwMJTVw8m2uCtIhpq3-XADhg&sa=D&sntz=1&usg=AFQjCNFhmRRzq3m2YPsL78KeQqPzUGicQQ
+      
+      AMPLab's Hive 0.11: 
+      
+      hive-0.11.0-bin
+    
+      https://www.google.com/url?q=https%3A%2F%2Fdl.dropboxusercontent.com%2Fs%2Fiofpitbs9tiju1s%2Fhive-0.11.0-bin.tgz%3Fdl%3D1%26token_hash%3DAAGKUddKHYFIAYzQSvRvsAPoykPGFo1YozBznqMhI66Lyg&sa=D&sntz=1&usg=AFQjCNGe6ROWW74BbSNIhEwJqr7TvJRlnw
                                         
   c. Set up Shark environment as mentioned in the Shark official page (scala-2.10.3 and shark-env.sh).
 
