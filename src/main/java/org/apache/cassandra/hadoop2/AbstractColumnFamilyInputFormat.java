@@ -196,7 +196,10 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
                         splits.addAll(split.get());
                         futureCallables.remove(split);
                     } catch (Exception e) {
-                        logger.error("Failed to fetch split, resubmitting...", e);
+                        if (retries >= MAX_RETRIES) {
+                            throw new IOException("Failed to fetch all splits", e);
+                        }
+                        logger.error("Failed to fetch split, resubmitting.", e);
                         executor.submit(futureCallables.get(split));
                         retries += 1;
                     }
