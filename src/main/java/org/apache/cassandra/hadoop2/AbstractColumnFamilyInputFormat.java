@@ -151,7 +151,7 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
                 }
             }
 
-            Map<Future<List<InputSplit>>, SplitCallable> futureCallables = Maps.newConcurrentMap();
+            Map<Future<List<InputSplit>>, SplitCallable> futureCallables = Maps.newHashMap();
 
             for (TokenRange range : masterRangeNodes) {
                 if (jobRange == null) {
@@ -168,7 +168,9 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
 
                     if (dhtRange.intersects(jobRange)) {
                         for (Range<Token> intersection : dhtRange.intersectionWith(jobRange)) {
+                            //noinspection unchecked
                             range.start_token = partitioner.getTokenFactory().toString(intersection.left);
+                            //noinspection unchecked
                             range.end_token = partitioner.getTokenFactory().toString(intersection.right);
                             // for each range, pick a live owner and ask it to compute bite-sized splits
                             SplitCallable callable = new SplitCallable(range, conf);
