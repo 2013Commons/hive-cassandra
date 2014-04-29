@@ -17,19 +17,9 @@
 */
 package org.apache.cassandra.hadoop2;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.apache.cassandra.auth.IAuthenticator;
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.dht.Range;
@@ -56,8 +46,19 @@ import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<K, Y> implements org.apache.hadoop.mapred.InputFormat<K, Y> {
 
@@ -70,6 +71,8 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
     // override it in your jobConf with this setting.
     public static final String CASSANDRA_HADOOP_MAX_KEY_SIZE = "cassandra.hadoop.max_key_size";
     public static final int CASSANDRA_HADOOP_MAX_KEY_SIZE_DEFAULT = 8192;
+
+    private static final int MAX_RETRIES = 5;
 
     private String keyspace;
     private String cfName;
@@ -128,7 +131,7 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
         List<InputSplit> splits = new ArrayList<InputSplit>();
 
         try {
-            List<Future<List<InputSplit>>> splitfutures = new ArrayList<Future<List<InputSplit>>>();
+            Map<Future<List<InputSplit>>, SplitCallable> splitfutures = new HashMap<Future<List<InputSplit>>, SplitCallable>();
             KeyRange jobKeyRange = ConfigHelper.getInputKeyRange(conf);
             Range<Token> jobRange = null;
             if (jobKeyRange != null) {
@@ -154,7 +157,9 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
                 if (jobRange == null) {
                     //logger.info("Getting input splits for null jobRange (user did not supply a key range)");
                     // for each range, pick a live owner and ask it to compute bite-sized splits
-                    splitfutures.add(executor.submit(new SplitCallable(range, conf)));
+                    SplitCallable callable = new SplitCallable(range, conf);
+                    Future<List<InputSplit>> future = executor.submit(callable);
+                    splitfutures.put(future, callable);
                 } else {
                     Range<Token> dhtRange = new Range<Token>(partitioner.getTokenFactory().fromString(range.start_token),
                             partitioner.getTokenFactory().fromString(range.end_token),
@@ -165,7 +170,9 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
                             range.start_token = partitioner.getTokenFactory().toString(intersection.left);
                             range.end_token = partitioner.getTokenFactory().toString(intersection.right);
                             // for each range, pick a live owner and ask it to compute bite-sized splits
-                            splitfutures.add(executor.submit(new SplitCallable(range, conf)));
+                            SplitCallable callable = new SplitCallable(range, conf);
+                            Future<List<InputSplit>> future = executor.submit(callable);
+                            splitfutures.put(future, callable);
                         }
                     }
                 }
@@ -174,11 +181,30 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
             logger.info("There are a total of " + splitfutures.size() + " splitFutures to turn into input splits!");
 
             // wait until we have all the results back
-            for (Future<List<InputSplit>> futureInputSplits : splitfutures) {
-                try {
-                    splits.addAll(futureInputSplits.get());
-                } catch (Exception e) {
-                    throw new IOException("Could not get input splits", e);
+            int retries = 0;
+
+            while (!splitfutures.isEmpty()) {
+                Iterator<Future<List<InputSplit>>> iterator = ImmutableList.copyOf(splitfutures.keySet()).iterator();
+                //noinspection WhileLoopReplaceableByForEach
+                while (iterator.hasNext()) {
+                    Future<List<InputSplit>> split = iterator.next();
+                    try {
+                        splits.addAll(split.get());
+                        splitfutures.remove(split);
+                    } catch (Exception e) {
+                        if (retries >= MAX_RETRIES) {
+                            throw new IOException("Could not get input splits", e);
+                        }
+                        SplitCallable callable = splitfutures.get(split);
+                        logger.error("Failed to fetch split: {} - retrying.", callable, e);
+
+                        // Remove failed split future
+                        splitfutures.remove(split);
+
+                        Future<List<InputSplit>> future = executor.submit(callable);
+                        splitfutures.put(future, callable);
+                        retries += 1;
+                    }
                 }
             }
         } finally {
@@ -202,6 +228,14 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
         public SplitCallable(TokenRange tr, Configuration conf) {
             this.range = tr;
             this.conf = conf;
+        }
+
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this)
+                    .add("range", range)
+                    .add("conf", conf)
+                    .toString();
         }
 
         public List<InputSplit> call() throws Exception {
