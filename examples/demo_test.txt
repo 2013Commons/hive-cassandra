@@ -1,0 +1,54 @@
+1) create keyspace/table in cassandra
+
+CREATE KEYSPACE metrics WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 2}; 
+USE metrics; 
+CREATE TABLE metric (  
+    api varchar,
+    name varchar,
+    time timestamp,
+    value double,
+    PRIMARY KEY (api, name, time)
+);
+
+2) insert data in cassandra
+
+INSERT INTO metric(api, name, time, value) VALUES('my_api', 'cpu0', dateof(NOW()), 0.31); 
+
+3) create an external table in shark linked to cassandra table
+CREATE DATABASE metrics;  
+CREATE EXTERNAL TABLE metrics.metric (api string, name string, time timestamp, value double) STORED BY 'org.apache.hadoop.hive.cassandra.cql.CqlStorageHandler' WITH SERDEPROPERTIES("cassandra.cf.name" = "metric","cassandra.host"="127.0.0.1","cassandra.port" = "9160") TBLPROPERTIES ("cassandra.ks.name" = "metrics"); 
+
+4) select data from shark 
+select * from metrics.metric;
+select count(*) from metrics.metric;
+select avg(value) from metrics.metric;
+
+5) drop shark external table
+show tables;
+drop table metrics.metric;
+show tables;
+
+6) create table in cassandra from shark, insert data and create table in shark, select data
+
+CREATE EXTERNAL TABLE test ( id string, value string) STORED BY 'org.apache.hadoop.hive.cassandra.cql.CqlStorageHandler' WITH SERDEPROPERTIES ("cassandra.ks.repfactor"="2","cassandra.host"="127.0.0.1","cassandra.port" = "9160") TBLPROPERTIES ("cassandra.ks.name" = "sharktest");
+
+CREATE EXTERNAL TABLE test2 ( id string, value string) STORED BY 'org.apache.hadoop.hive.cassandra.cql.CqlStorageHandler' WITH SERDEPROPERTIES("cassandra.ks.repfactor"="2","cassandra.host"="127.0.0.1","cassandra.port" = "9160") TBLPROPERTIES ("cassandra.ks.name" = "metrics");
+
+use sharktest;
+INSERT INTO sharktest.test(id,value) VALUES ('a','valueA');
+
+INSERT INTO metrics.test2(id,value) VALUES ('a','valueA2');
+
+INSERT INTO metrics.test2(id,value) VALUES ('b','valueB2');
+
+select * from sharktest.test;
+select * from metrics.test2;
+
+
+7) insert data in shark --> effectively into cassandra table
+INSERT OVERWRITE TABLE test SELECT * FROM test2;
+
+8) select data from cassandra to do join
+
+SELECT * FROM test t INNER JOIN test2 test2 ON t.id=cast(test2.id as string);
+
