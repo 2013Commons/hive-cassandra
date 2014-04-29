@@ -183,23 +183,25 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
             int retries = 0;
 
             while (!splitfutures.isEmpty()) {
-                Iterator<Future<List<InputSplit>>> iterator = splitfutures.keySet().iterator();
+                Iterator<Future<List<InputSplit>>> iterator = ImmutableList.copyOf(splitfutures.keySet()).iterator();
                 //noinspection WhileLoopReplaceableByForEach
                 while (iterator.hasNext()) {
                     Future<List<InputSplit>> split = iterator.next();
                     try {
                         splits.addAll(split.get());
-                        iterator.remove();
+                        splitfutures.remove(split);
                     } catch (Exception e) {
                         if (retries >= MAX_RETRIES) {
                             throw new IOException("Could not get input splits", e);
                         }
                         logger.error("Failed to fetch split, resubmitting.", e);
                         SplitCallable callable = splitfutures.get(split);
+
+                        // Remove failed split future
+                        splitfutures.remove(split);
+
                         Future<List<InputSplit>> future = executor.submit(callable);
                         splitfutures.put(future, callable);
-                        // Remove failed split future
-                        iterator.remove();
                         retries += 1;
                     }
                 }
