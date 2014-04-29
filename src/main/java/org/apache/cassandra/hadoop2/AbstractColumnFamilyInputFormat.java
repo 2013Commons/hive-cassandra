@@ -17,6 +17,7 @@
 */
 package org.apache.cassandra.hadoop2;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.cassandra.auth.IAuthenticator;
@@ -194,8 +195,8 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
                         if (retries >= MAX_RETRIES) {
                             throw new IOException("Could not get input splits", e);
                         }
-                        logger.error("Failed to fetch split, resubmitting.", e);
                         SplitCallable callable = splitfutures.get(split);
+                        logger.error("Failed to fetch split: {} - retrying.", callable, e);
 
                         // Remove failed split future
                         splitfutures.remove(split);
@@ -227,6 +228,14 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
         public SplitCallable(TokenRange tr, Configuration conf) {
             this.range = tr;
             this.conf = conf;
+        }
+
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this)
+                    .add("range", range)
+                    .add("conf", conf)
+                    .toString();
         }
 
         public List<InputSplit> call() throws Exception {
