@@ -72,7 +72,6 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
     public static final String CASSANDRA_HADOOP_MAX_KEY_SIZE = "cassandra.hadoop.max_key_size";
     public static final int CASSANDRA_HADOOP_MAX_KEY_SIZE_DEFAULT = 8192;
 
-    private static final int MAX_RETRIES = 5;
 
     private String keyspace;
     private String cfName;
@@ -127,7 +126,9 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
         logger.debug("partitioner is " + partitioner);
 
         // Canonical ranges, split into pieces, fetching the splits in parallel
-        ExecutorService executor = Executors.newCachedThreadPool();
+        int maxThreads = ConfigHelper.getMaxThreads(conf);
+        logger.debug("Max threads: {}", maxThreads);
+        ExecutorService executor = (maxThreads == 0) ? Executors.newCachedThreadPool() : Executors.newFixedThreadPool(maxThreads);
         List<InputSplit> splits = new ArrayList<InputSplit>();
 
         try {
@@ -182,6 +183,8 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
 
             // wait until we have all the results back
             int retries = 0;
+            int maxRetries = ConfigHelper.getMaxRetries(conf);
+            logger.debug("Max Retries: {}", maxRetries);
 
             while (!splitfutures.isEmpty()) {
                 Iterator<Future<List<InputSplit>>> iterator = ImmutableList.copyOf(splitfutures.keySet()).iterator();
@@ -192,7 +195,7 @@ public abstract class AbstractColumnFamilyInputFormat<K, Y> extends InputFormat<
                         splits.addAll(split.get());
                         splitfutures.remove(split);
                     } catch (Exception e) {
-                        if (retries >= MAX_RETRIES) {
+                        if (retries >= maxRetries) {
                             throw new IOException("Could not get input splits", e);
                         }
                         SplitCallable callable = splitfutures.get(split);

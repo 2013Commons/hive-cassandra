@@ -38,6 +38,11 @@ public abstract class AbstractCassandraSerDe implements SerDe {
     public static final String CASSANDRA_COL_MAPPING = "cassandra.columns.mapping";
     public static final String CASSANDRA_INDEXED_COLUMNS = "cassandra.indexed.columns";
 
+    public static final String CASSANDRA_HADOOP_RETRIES_KEY = "cassandra.max.rpc.retries";
+    public static final String DEFAULT_CASSANDRA_HADOOP_RETRIES = "0";
+    public static final String CASSANDRA_HADOOP_MAX_THREADS_KEY = "cassandra.max.rpc.threads";
+    public static final String DEFAULT_CASSANDRA_HADOOP_MAX_THREADS = "0";
+
     public static final String CASSANDRA_BATCH_MUTATION_SIZE = "cassandra.batchmutate.size";
     public static final String CASSANDRA_SLICE_PREDICATE_COLUMN_NAMES = "cassandra.slice.predicate.column_names";
     public static final String CASSANDRA_SLICE_PREDICATE_RANGE_START = "cassandra.slice.predicate.range.start";
