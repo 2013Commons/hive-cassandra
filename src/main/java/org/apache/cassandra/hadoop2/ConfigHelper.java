@@ -20,26 +20,35 @@ package org.apache.cassandra.hadoop2;
  *
  */
 
-import java.io.IOException;
-import java.util.*;
-
 import com.google.common.collect.Maps;
-import org.apache.cassandra.io.compress.CompressionParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.dht.IPartitioner;
-import org.apache.cassandra.thrift.*;
+import org.apache.cassandra.exceptions.ConfigurationException;
+import org.apache.cassandra.io.compress.CompressionParameters;
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.ITransportFactory;
+import org.apache.cassandra.thrift.IndexExpression;
+import org.apache.cassandra.thrift.KeyRange;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.TFramedTransportFactory;
 import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.Hex;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.cassandra.serde.AbstractCassandraSerDe;
 import org.apache.thrift.TBase;
 import org.apache.thrift.TDeserializer;
 import org.apache.thrift.TException;
 import org.apache.thrift.TSerializer;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TTransport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ConfigHelper {
 
@@ -391,6 +400,22 @@ public class ConfigHelper {
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static int getMaxThreads(Configuration conf) {
+        return conf.getInt(AbstractCassandraSerDe.CASSANDRA_HADOOP_MAX_THREADS_KEY, 0);
+    }
+
+    public static void setMaxThreads(Configuration conf, int maxThreads) {
+        conf.setInt(AbstractCassandraSerDe.CASSANDRA_HADOOP_MAX_THREADS_KEY, maxThreads);
+    }
+
+    public static int getMaxRetries(Configuration conf) {
+        return conf.getInt(AbstractCassandraSerDe.CASSANDRA_HADOOP_RETRIES_KEY, 0);
+    }
+
+    public static void setMaxRetries(Configuration conf, int maxRetries) {
+        conf.setInt(AbstractCassandraSerDe.CASSANDRA_HADOOP_RETRIES_KEY, maxRetries);
     }
 
     public static int getOutputRpcPort(Configuration conf) {

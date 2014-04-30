@@ -80,6 +80,18 @@ public class CassandraStorageHandler
 
         jobProperties.put(AbstractCassandraSerDe.CASSANDRA_PORT, port);
 
+        String maxThreads = configuration.get(AbstractCassandraSerDe.CASSANDRA_HADOOP_MAX_THREADS_KEY);
+        if (maxThreads == null) {
+            maxThreads = tableProperties.getProperty(AbstractCassandraSerDe.CASSANDRA_HADOOP_MAX_THREADS_KEY, AbstractCassandraSerDe.DEFAULT_CASSANDRA_HADOOP_MAX_THREADS);
+        }
+        jobProperties.put(AbstractCassandraSerDe.CASSANDRA_HADOOP_MAX_THREADS_KEY, maxThreads);
+
+        String maxRetries = configuration.get(AbstractCassandraSerDe.CASSANDRA_HADOOP_RETRIES_KEY);
+        if (maxRetries == null) {
+            maxRetries = tableProperties.getProperty(AbstractCassandraSerDe.CASSANDRA_HADOOP_RETRIES_KEY, AbstractCassandraSerDe.DEFAULT_CASSANDRA_HADOOP_RETRIES);
+        }
+        jobProperties.put(AbstractCassandraSerDe.CASSANDRA_HADOOP_RETRIES_KEY, maxRetries);
+
         if (configuration.get(AbstractCassandraSerDe.CASSANDRA_PARTITIONER) == null) {
             jobProperties.put(AbstractCassandraSerDe.CASSANDRA_PARTITIONER,
                     tableProperties.getProperty(AbstractCassandraSerDe.CASSANDRA_PARTITIONER,
