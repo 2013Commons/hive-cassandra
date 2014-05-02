@@ -11,6 +11,7 @@ import org.apache.hadoop.hive.metastore.MetaStoreUtils;
 import org.apache.hadoop.hive.metastore.api.hive_metastoreConstants;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +30,14 @@ public class CqlManager {
     final static Map<String, String> hiveTypeToCqlType = new HashMap<String, String>();
 
     static {
-        hiveTypeToCqlType.put(org.apache.hadoop.hive.serde.Constants.STRING_TYPE_NAME, "text");
-        hiveTypeToCqlType.put(org.apache.hadoop.hive.serde.Constants.INT_TYPE_NAME, "int");
-        hiveTypeToCqlType.put(org.apache.hadoop.hive.serde.Constants.BOOLEAN_TYPE_NAME, "boolean");
-        hiveTypeToCqlType.put(org.apache.hadoop.hive.serde.Constants.DOUBLE_TYPE_NAME, "double");
-        hiveTypeToCqlType.put(org.apache.hadoop.hive.serde.Constants.FLOAT_TYPE_NAME, "float");
-    }
+        hiveTypeToCqlType.put(serdeConstants.STRING_TYPE_NAME, "text");
+        hiveTypeToCqlType.put(serdeConstants.INT_TYPE_NAME, "int");
+        hiveTypeToCqlType.put(serdeConstants.BOOLEAN_TYPE_NAME, "boolean");
+        hiveTypeToCqlType.put(serdeConstants.DOUBLE_TYPE_NAME, "double");
+        hiveTypeToCqlType.put(serdeConstants.FLOAT_TYPE_NAME, "float");
+        hiveTypeToCqlType.put(serdeConstants.BIGINT_TYPE_NAME, "bigint");
+        hiveTypeToCqlType.put(serdeConstants.TIMESTAMP_TYPE_NAME, "timestamp");
+        hiveTypeToCqlType.put(serdeConstants.MAP_TYPE_NAME, "map");    }
 
     //Cassandra Host Name
     private final String host;
