@@ -26,6 +26,18 @@ Instructions of usage:
       https://www.google.com/url?q=https%3A%2F%2Fdl.dropboxusercontent.com%2Fs%2Fiofpitbs9tiju1s%2Fhive-0.11.0-bin.tgz%3Fdl%3D1%26token_hash%3DAAGKUddKHYFIAYzQSvRvsAPoykPGFo1YozBznqMhI66Lyg&sa=D&sntz=1&usg=AFQjCNGe6ROWW74BbSNIhEwJqr7TvJRlnw
                                         
   c. Set up Shark environment as mentioned in the Shark official page (scala-2.10.3 and shark-env.sh).
+  
+  
+  other option : 
+     shark-0.9.1-hadoop2-bin: in shark official page 
+     
+     https://github.com/amplab/shark/releases
+   
+      AMPLab's Hive 0.11: 
+      
+      https://www.google.com/url?q=https%3A%2F%2Fdl.dropboxusercontent.com%2Fs%2Fiofpitbs9tiju1s%2Fhive-0.11.0-bin.tgz%3Fdl%3D1%26token_hash%3DAAGKUddKHYFIAYzQSvRvsAPoykPGFo1YozBznqMhI66Lyg&sa=D&sntz=1&usg=AFQjCNGe6ROWW74BbSNIhEwJqr7TvJRlnw
+  
+  
 
 
 2. Install the project:
